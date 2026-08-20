@@ -1,0 +1,68 @@
+typedef struct {
+    int dia, mes, ano;
+} Data;
+
+typedef struct {
+    int horas, minutos;
+} Horario;
+
+typedef enum {
+    ESPEC_CLINICO, ESPEC_PEDIATRA, ESPEC_DERMATO, ESPEC_CARDIO,
+    ESPEC_OUTRA
+} Especialidade;
+
+typedef struct {
+    int id;
+    char nome[64];
+    Especialidade especialidade;
+    // Janela típica de atendimento (ex.: 08:00–12:00 / 14:00–18:00)
+    Horario inicioManha, fimManha;
+    Horario inicioTarde, fimTarde;
+} Medico;
+
+typedef struct {
+    int id;
+    char nome[64];
+    char contato[64]; // telefone/email
+
+} Paciente;
+
+typedef enum {
+    CONS_AGENDADA, CONS_CONCLUIDA, CONS_CANCELADA,
+    CONS_FALTA
+} StatusConsulta;
+
+// Slot de 1 consulta
+typedef struct {
+    int id;
+    int idMedico;
+    int idPaciente;
+    Data data;
+    Horario inicio;
+    Horario fim;
+    StatusConsulta status;
+    int prioridade; // 0 normal; 1 urgente (para “inteligente”/fila)
+} Consulta;
+
+typedef struct {
+    Medico *itens; int qtd, cap;
+} VetMedicos;
+
+typedef struct {
+    Paciente *itens; int qtd, cap;
+} VetPacientes;
+
+typedef struct {
+    Consulta *itens; int qtd, cap;
+} VetConsultas;
+
+// (Opcional) Regras de agendamento inteligente
+typedef struct {
+    int duracaoPadraoMin; // ex.: 30 minutos
+    int permiteSobreposicao; // 0 não, 1 sim (nunca recomendado)
+    int prioridadeUrgentePrimeiro;// 1: sempre tentar marcar urgente no 1o slot livre
+} PoliticaAgendamento;
+
+void add_paciente(VetPacientes *pacientes);
+void search_paciente(VetPacientes *pacientes);
+void read_pacientes(VetPacientes *pacientes);
