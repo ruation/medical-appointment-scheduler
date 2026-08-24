@@ -44,6 +44,7 @@ typedef struct {
     int prioridade; // 0 normal; 1 urgente (para “inteligente”/fila)
 } Consulta;
 
+
 typedef struct {
     Medico *itens; int qtd, cap;
 } VetMedicos;
@@ -63,6 +64,16 @@ typedef struct {
     int prioridadeUrgentePrimeiro;// 1: sempre tentar marcar urgente no 1o slot livre
 } PoliticaAgendamento;
 
+//Prototipos de funções gerais
+int read_horas(Horario horario);
+int contar_linhas(FILE *arquivo);
+
+//Prototipos de funções de pacientes
 void add_paciente(VetPacientes *pacientes);
 void search_paciente(VetPacientes *pacientes);
 void read_pacientes(VetPacientes *pacientes);
+
+//Prototipos de funções de medicos
+
+void read_medicos(VetMedicos *medicos);
+int realocar_medicos(VetMedicos *medicos);
