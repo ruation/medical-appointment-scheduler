@@ -8,6 +8,8 @@ int main()
 
 	// Inicializa o VetPacientes com valores iniciais
 	VetPacientes pacientes;
+	VetMedicos medicos;
+	read_medicos(&medicos);
 	pacientes.qtd = 0;
 	pacientes.cap = 10;
 	pacientes.itens = (Paciente *) malloc(sizeof(Paciente) * pacientes.cap);
@@ -18,8 +20,8 @@ int main()
 		switch(op) {
 		case 1:
 			int op1;
+			read_pacientes(&pacientes); //this is inside the clientes menu, maybe replace it in the main menu.
 			do {
-				read_pacientes(&pacientes); //this is inside the clientes menu, maybe replace it in the main menu.
 				printf("---- menu pacientes ----\n1 - adicionar\n2 - procurar paciente\n9 - voltar\n");
 				scanf("%d", &op1);
 				switch(op1) {
@@ -39,4 +41,6 @@ int main()
 			break;
 		}
 	} while(op!=9);
+	free(pacientes.itens);
+	free(medicos.itens);
 }
