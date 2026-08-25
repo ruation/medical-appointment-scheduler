@@ -61,7 +61,7 @@ void read_pacientes(VetPacientes *pacientes){
 	file = fopen("pacientes.txt", "r");
 
 	if(file == NULL){
-	    printf("erro");
+	    return;
 	}
 	while(fscanf(file, "%s %s %d\n", &pacientes->itens[i].nome, &pacientes->itens[i].contato, &pacientes->itens[i].id) != EOF){i++;}
 	pacientes->qtd = i;
