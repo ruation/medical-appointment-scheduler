@@ -8,8 +8,11 @@ int main()
 
 	// Inicializa o VetPacientes com valores iniciais
 	VetPacientes pacientes;
+	
+	//Inicia o VetMedicos
 	VetMedicos medicos;
 	read_medicos(&medicos);
+	
 	pacientes.qtd = 0;
 	pacientes.cap = 10;
 	pacientes.itens = (Paciente *) malloc(sizeof(Paciente) * pacientes.cap);
