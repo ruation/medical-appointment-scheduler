@@ -68,7 +68,8 @@ typedef struct {
 } PoliticaAgendamento;
 
 //Prototipos de funções gerais
-int read_horas(Horario horario);
+void receber_hora(Horario *horario);
+int con_horas(Horario horario);
 void desconverter_horas(int n, Horario *horario);
 int contar_linhas(FILE *arquivo);
 
@@ -81,3 +82,6 @@ void read_pacientes(VetPacientes *pacientes);
 
 void read_medicos(VetMedicos *medicos);
 int realocar_medicos(VetMedicos *medicos);
+void add_medico(VetMedicos *medicos);
+void mostrar_medico(Medico medico);
+void pesquisar_medicos(VetMedicos *medicos);
