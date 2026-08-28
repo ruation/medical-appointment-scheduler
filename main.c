@@ -4,37 +4,59 @@
 
 int main()
 {
-    int op;
-    
-    // Inicializa o VetPacientes com valores iniciais
-    VetPacientes pacientes; pacientes.qtd = 0; pacientes.cap = 10; pacientes.itens = (Paciente *) malloc(sizeof(Paciente) * pacientes.cap); 
-    
-    do{
-        printf("---- menu ----\n1 - pacientes\n9 - sair\n");
-        scanf("%d", &op);
-        switch(op){
-            case 1:
-                int op1;
-                do{
-                    read_pacientes(&pacientes); //this is inside the clientes menu, maybe replace it in the main menu.
-                    printf("---- menu pacientes ----\n1 - adicionar\n2 - procurar paciente\n9 - voltar\n");
-                    scanf("%d", &op1);
-                    switch(op1){
-                        case 1:
-                            add_paciente(&pacientes);
-                            break;
-                        case 2:
-                            search_paciente(&pacientes);
-                        default:
-                            break;
-                    }
-                }while(op1!=9);
-                break;
-                
-            default:
-                break;
-        }
-    }while(op!=9);
+	int op, op1;
 
-    return 0;
+	// Inicializa o VetPacientes com valores iniciais
+	VetPacientes pacientes;
+	
+	//Inicia o VetMedicos
+	VetMedicos medicos;
+	read_medicos(&medicos);
+	pacientes.qtd = 0;
+	pacientes.cap = 10;
+	pacientes.itens = (Paciente *) malloc(sizeof(Paciente) * pacientes.cap);
+
+	do {
+		printf("---- menu ----\n1 - pacientes\n2 - medicos\n9 - sair\n");
+		scanf("%d", &op);
+		switch(op) {
+		case 1:
+			read_pacientes(&pacientes); //this is inside the clientes menu, maybe replace it in the main menu.
+			do {
+				printf("---- menu pacientes ----\n1 - adicionar\n2 - procurar paciente\n9 - voltar\n");
+				scanf("%d", &op1);
+				switch(op1) {
+				case 1:
+					add_paciente(&pacientes);
+					break;
+				case 2:
+					search_paciente(&pacientes);
+					break;
+				default:
+					break;
+				}
+			} while(op1!=9);
+		break;
+		case 2:
+			do {
+				printf("---- menu medicos ----\n1 - adicionar\n2 - pesquisar medicos\n9 - voltar\n");
+				scanf("%d", &op1);
+				switch(op1) {
+				case 1:
+					add_medico(&medicos);
+					break;
+				case 2:
+				    pesquisar_medicos (&medicos);
+				    break;
+				default:
+					break;
+				}
+			} while(op1!=9);
+			break;
+		default:
+			break;
+		}
+	} while(op!=9);
+	free(pacientes.itens);
+	free(medicos.itens);
 }
