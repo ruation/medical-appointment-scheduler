@@ -86,4 +86,5 @@ void read_medicos(VetMedicos *medicos);
 int realocar_medicos(VetMedicos *medicos);
 void add_medico(VetMedicos *medicos);
 void mostrar_medico(Medico medico);
-void pesquisar_medicos(VetMedicos *medicos);
+int pesquisar_medicos(VetMedicos *medicos);
+void remover_medico(VetMedicos *medicos);

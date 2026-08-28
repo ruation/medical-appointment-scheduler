@@ -246,20 +246,21 @@ int realocar_medicos(VetMedicos *medicos) {
 
 //Para converter o numero da especialidade em uma string
 //Especialidade é do tipo enum, ou seja, um inteiro
-char* ler_especialidade(int n) {
-	char especialidade[20];
+const char* ler_especialidade(int n) {
 	//Recebe um numero da especialidade e devolve a string correta
 	switch(n) {
 	case 0:
-		return strcpy(especialidade, "Clinico");
+		return "Clinico";
 	case 1:
-		return strcpy(especialidade, "Pediatra");
+		return "Pediatra";
 	case 2:
-		return strcpy(especialidade, "Dermatologista");
+		return "Dermatologista";
 	case 3:
-		return strcpy(especialidade, "Cardiologista");
+		return "Cardiologista";
 	case 4:
-		return strcpy(especialidade, "Outro");
+		return "Outro";
+	default:
+	    return "Especialidade invalida";
 	}
 
 }
@@ -389,8 +390,6 @@ void add_medico(VetMedicos *medicos) {
 
 	printf("        Deseja adicionar\n");
 	mostrar_medico(medico);
-	printf("Digite y para confirmar ou n para cancelar\n");
-	scanf(" %c", &choise);
 
     while(1){
         printf("Digite y para confirmar ou n para cancelar\n");
@@ -407,7 +406,7 @@ void add_medico(VetMedicos *medicos) {
 		return;
 	}
 	printf("Adicionando...\n\n");
-	fprintf(file, "%d|%s|%d|%d|%d|%d|%d\n",medico.id, medico.nome, choise1,con_horas(medico.inicioManha),con_horas(medico.fimManha),con_horas(medico.inicioTarde),con_horas(medico.fimTarde));
+	fprintf(file, "%d|%s|%d|%d|%d|%d|%d\n",medico.id, medico.nome, medico.especialidade,con_horas(medico.inicioManha),con_horas(medico.fimManha),con_horas(medico.inicioTarde),con_horas(medico.fimTarde));
 
 	fclose(file);
     
@@ -417,18 +416,55 @@ void add_medico(VetMedicos *medicos) {
 	medicos->qtd++;
 }
 
-void pesquisar_medicos(VetMedicos *medicos){
+int pesquisar_medicos(VetMedicos *medicos){
     int numero, i;
-    
     printf("Digite o id do medico desejado\n");
     scanf("%d", &numero);
     //Percorre todo vetor de medicos até encontrar o medico com id escolhido pelo usuario.
-    for(i = 0; i<medicos->qtd && numero!=medicos->itens[i].id; i++);
+    
+    for(i = 0; i < medicos->qtd && numero!=medicos->itens[i].id; i++);
     //Testa se encontrou o medico
-    if(numero == medicos->itens[i].id && numero>0){
-        printf("Medico encontrado\n");
-        mostrar_medico(medicos->itens[i]);
+    if( i < medicos->itens[i].id && numero!=0){
+        if(numero == medicos->itens[i].id){
+            printf("Medico encontrado\n");
+            mostrar_medico(medicos->itens[i]);
+            return i;
+        }
     }else{
         printf("Medico não encontrado no sistema\n");
+        return -1;
     }
+}
+
+void remover_medico(VetMedicos *medicos){
+    int i, id;
+    char choise;
+    id = pesquisar_medicos(medicos);
+    //Aproveita a função anterior para já pegar o id do medico selecionado para ser deletado
+    if(id==-1)return;
+    printf("Deseja remover esse medico?\n");
+    
+    while(1){
+        printf("Digite y para confirmar ou n para cancelar\n");
+	    scanf(" %c", &choise);
+    	if(choise == 'n')return;
+    	if(choise == 'y')break;
+    }
+    
+    FILE *file;
+    //Remove o medico
+    //Basicamente joga todos elemetos a direita dele para esquerda. Sobreescrevendo o elemento apagado
+    for(i = id; i < medicos->qtd-1 ;i++){
+        medicos->itens[i] = medicos->itens[i + 1];
+    }
+    medicos->qtd--;
+    
+    file = fopen("medicos.txt", "w");
+    //Limpa todo o arquivo e em seguida preenche novamente com os dados restantes do vetor
+    for(i = 0;i<medicos->qtd; i++){
+        fprintf(file, "%d|%s|%d|%d|%d|%d|%d\n",medicos->itens[i].id, medicos->itens[i].nome, medicos->itens[i].especialidade,con_horas(medicos->itens[i].inicioManha),con_horas(medicos->itens[i].fimManha),con_horas(medicos->itens[i].inicioTarde),con_horas(medicos->itens[i].fimTarde));
+    }
+    
+	fclose(file);
+	printf("Removendo medico...\n");
 }
