@@ -3,77 +3,157 @@
 #include <stdlib.h>
 #include "mylib.h"
 
-void add_paciente(VetPacientes *pacientes) {
-	FILE *file;
-	char nome[64];
-	char contato[64];
-	char choice;
-
-	printf("Digite o nome do paciente: ");
-	getchar();
-	fgets(nome,64, stdin);
-	nome[strcspn(nome, "\n")] = '\0';
-	printf("Digite o e-mail do paciente: ");
-	fgets(contato,64, stdin);
-	contato[strcspn(contato, "\n")] = '\0';
-	printf("Adicionar o paciente %s, contato: %s com o id: %d? (y/n)\n", nome, contato, pacientes->qtd);
-	scanf(" %c", &choice);
-
-	if(choice == 'n') {
-		return;
+void add_paciente(VetPacientes *pacientes){
+    FILE *file;
+    char nome[64];char contato[64]; char choice;
+    
+    int flag = realocar_pacientes(pacientes);
+    
+    if(flag == 0){
+        return;
+    }
+    
+    printf("Digite o nome do paciente: ");
+    getchar();
+    fgets(nome,64, stdin);
+    nome[strcspn(nome, "\n")] = '\0';
+    printf("Digite o e-mail do paciente: ");
+    fgets(contato,64, stdin);
+    contato[strcspn(contato, "\n")] = '\0';
+    
+    	
+	int maior = 0;
+	if(pacientes->qtd > 0){
+	    for(int i = 0; i<pacientes->qtd; i++){
+	        if(pacientes->itens[i].id > maior){maior = pacientes->itens[i].id;}
+	    }
 	}
-	printf("Adicionando...\n\n");
-
+	
+    
+    printf("Adicionar o paciente %s, contato: %s com o id: %d? (y/n)\n", nome, contato, maior+1);
+    scanf(" %c", &choice);
+    
+    if(choice == 'n'){return;}
+    printf("Adicionando...\n\n");
+    
 
 	file = fopen("pacientes.txt","a"); //a-append
 
-	if(file == NULL) {
-		printf("Erro ao abrir arquivo");
-		return;
+	if(file == NULL){
+	    printf("Erro ao abrir arquivo");
+	    return;
 	}
 
-	//fprintf é uma função para escrever no arquivo.
-	fprintf(file, "%s %s %d\n", nome, contato, pacientes->qtd);
-
+	//fprintf é uma função para escrever no arquivo. 
+	fprintf(file, "%s | %s | %d\n", nome, contato, maior+1);
+	
 	fclose(file);
-
+	
 	strcpy(pacientes->itens[pacientes->qtd].nome, nome);
 	strcpy(pacientes->itens[pacientes->qtd].contato, contato);
-	pacientes->itens[pacientes->qtd].id = pacientes->qtd;
-
+	pacientes->itens[pacientes->qtd].id = maior+1;
+	
 	pacientes->qtd++;
-
+	
 	printf("Paciente cadastrado.\n");
-
+	
 
 }
-void search_paciente(VetPacientes *pacientes) {
-	int id;
+
+int search_paciente(VetPacientes *pacientes) {
+	int id, i;
 	if(pacientes->qtd == 0) {
 		printf("Não existe pacientes cadastrados.\n");
-		return;
+		return 0;
 	}
 	printf("Digite o id do paciente: ");
 	scanf("%d", &id);
-	if(id >= pacientes->qtd || id<0) {
-		printf("Paciente não encotrado.\n");    //gambiarra
-		return;
-	}
-	printf("id: %d nome: %s contato: %s\n", pacientes->itens[id].id, pacientes->itens[id].nome, pacientes->itens[id].contato);
+    for(i=0; i<pacientes->qtd; i++){
+        if(pacientes->itens[i].id == id){
+            printf("id: %d nome: %s contato: %s\n", pacientes->itens[i].id, pacientes->itens[i].nome, pacientes->itens[i].contato);
+            return i;
+        }
+    }
+    printf("Paciente não encontrado no sistema.\n");
+    return 0;
 }
 
-void read_pacientes(VetPacientes *pacientes) {
-	FILE *file;
-
-	int i = 0;
+void read_pacientes(VetPacientes *pacientes){
+    FILE *file;
+    
+    int i = 0;
 	file = fopen("pacientes.txt", "r");
 
 	if(file == NULL){
+	    pacientes->qtd = 0; pacientes->cap = 10;
+	    pacientes->itens = (Paciente *) malloc(sizeof(Paciente) * pacientes->cap);
+	    
+		if(pacientes->itens == NULL) {
+			printf("Erro de memoria\n");
+			return;
+		}
+		
+		file = fopen("medicos.txt","w");
+		
+		if(file == NULL) {
+			printf("Erro ao abrir o arquivo\n");
+		}
+		fclose(file);
+	    
 	    return;
 	}
+	
+	pacientes->qtd = contar_linhas(file); pacientes->cap = pacientes->qtd + 10;
+	pacientes->itens = (Paciente *) malloc(sizeof(Paciente) * pacientes->cap);
+	
+	if(pacientes->itens == NULL) {
+		printf("Erro ao realocar o vetor\n");
+		fclose(file);
+		return;
+	}
+	
+	
+	while(fscanf(file, "%63[^|] | %s | %d\n", &pacientes->itens[i].nome, &pacientes->itens[i].contato, &pacientes->itens[i].id) != EOF){i++;}
 	pacientes->qtd = i;
-
+	
 	fclose(file);
+}
+
+int realocar_pacientes(VetPacientes *pacientes){
+    if(pacientes->qtd == pacientes->cap){
+        pacientes->itens = (Paciente *) realloc(pacientes->itens, sizeof(Paciente) * (pacientes->cap+10));
+        if(pacientes->itens == NULL){
+            printf("Erro de memoria!\n");
+            return 0;
+        }
+        pacientes->cap += 10;
+    }
+    return 1;
+}
+
+void remover_paciente(VetPacientes *pacientes){
+    int id = search_paciente(pacientes);
+    char choice;
+    if(id == 0){return;}
+    printf("Deseja remover esse paciente? (y/n)\n");
+    scanf(" %c", &choice);
+    if(choice == 'n')return;
+    
+    FILE *file;
+    
+    for(int i = id; i<pacientes->qtd-1; i++){
+        pacientes->itens[i] = pacientes->itens[i+1];
+    }
+    pacientes->qtd--;
+    
+    file = fopen("pacientes.txt", "w");
+    
+    for(int i = 0; i<pacientes->qtd; i++){
+        fprintf(file, "%s | %s | %d\n", pacientes->itens[i].nome, pacientes->itens[i].contato, pacientes->itens[i].id);
+    }
+    fclose(file);
+    printf("Paciente removido.\n");
+    
 }
 
 
