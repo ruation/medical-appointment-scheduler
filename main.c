@@ -39,15 +39,17 @@ int main()
 		break;
 		case 2:
 			do {
-				printf("---- menu medicos ----\n1 - adicionar\n2 - pesquisar medicos\n9 - voltar\n");
+				printf("---- menu medicos ----\n1 - adicionar\n2 - pesquisar medicos\n3 - remover medico\n9 - voltar\n");
 				scanf("%d", &op1);
 				switch(op1) {
 				case 1:
 					add_medico(&medicos);
 					break;
 				case 2:
-				    pesquisar_medicos (&medicos);
+				    pesquisar_medicos(&medicos);
 				    break;
+				case 3:
+				    remover_medico(&medicos);
 				default:
 					break;
 				}
