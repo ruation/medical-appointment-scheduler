@@ -64,7 +64,7 @@ int search_paciente(VetPacientes *pacientes) {
 	int id, i;
 	if(pacientes->qtd == 0) {
 		printf("Não existe pacientes cadastrados.\n");
-		return 0;
+		return -1;
 	}
 	printf("Digite o id do paciente: ");
 	scanf("%d", &id);
@@ -75,7 +75,7 @@ int search_paciente(VetPacientes *pacientes) {
         }
     }
     printf("Paciente não encontrado no sistema.\n");
-    return 0;
+    return -1;
 }
 
 void read_pacientes(VetPacientes *pacientes){
@@ -134,7 +134,7 @@ int realocar_pacientes(VetPacientes *pacientes){
 void remover_paciente(VetPacientes *pacientes){
     int id = search_paciente(pacientes);
     char choice;
-    if(id == 0){return;}
+    if(id == -1){return;}
     printf("Deseja remover esse paciente? (y/n)\n");
     scanf(" %c", &choice);
     if(choice == 'n')return;
