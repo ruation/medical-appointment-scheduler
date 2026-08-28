@@ -75,8 +75,10 @@ int contar_linhas(FILE *arquivo);
 
 //Prototipos de funções de pacientes
 void add_paciente(VetPacientes *pacientes);
-void search_paciente(VetPacientes *pacientes);
+int search_paciente(VetPacientes *pacientes);
 void read_pacientes(VetPacientes *pacientes);
+int realocar_pacientes(VetPacientes *pacientes);
+void remover_paciente(VetPacientes *pacientes);
 
 //Prototipos de funções de medicos
 
