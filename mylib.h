@@ -93,3 +93,7 @@ void mostrar_medico(Medico medico);
 int pesquisar_medicos(VetMedicos *medicos);
 void remover_medico(VetMedicos *medicos);
 void listar_medicos(VetMedicos *medicos);
+
+//Prototipos de funções de consultas 
+
+void add_consulta(VetConsultas *consultas, VetPacientes *pacientes, VetMedicos *medicos);

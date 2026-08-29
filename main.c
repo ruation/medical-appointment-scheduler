@@ -13,16 +13,21 @@ int main()
 	//Inicia o VetMedicos
 	VetMedicos medicos;
 	read_medicos(&medicos);
+	
+	//Inicializa o VetConsultas com valores iniciais
+	VetConsultas consultas;
+	consultas.qtd = 0; consultas.cap = 10;
+	consultas.itens = (Consulta *) malloc(sizeof(Consulta ) * consultas.cap);
 
 
 
 	do {
-		printf("---- menu ----\n1 - pacientes\n2 - medicos\n9 - sair\n");
+		printf("---- menu ----\n1 - pacientes\n2 - medicos\n3 - consultas\n9 - sair\n");
 		scanf("%d", &op);
 		switch(op) {
 		case 1:
 			do {
-				printf("---- menu pacientes ----\n1 - adicionar\n2 - procurar paciente\n3 - remover paciente\n4 - listar_pacientes\n9 - voltar\n");
+				printf("---- menu pacientes ----\n1 - adicionar\n2 - procurar paciente\n3 - remover paciente\n4 - listar pacientes\n9 - voltar\n");
 				scanf("%d", &op1);
 				switch(op1) {
 				case 1:
@@ -64,10 +69,28 @@ int main()
 				}
 			} while(op1!=9);
 			break;
+		case 3:
+			do {
+				printf("---- menu consultas ----\n1 - adicionar\n2 - editar consulta\n3 - listar consultas\n9 - voltar\n");
+				scanf("%d", &op1);
+				switch(op1){
+				    case 1:
+				        add_consulta(&consultas, &pacientes, &medicos);
+				        break;
+				    case 2:
+				        break;
+				    case 3:
+				        break;
+				    default:
+				        break;
+				}
+			}while(op1!=9);
+			break;
 		default:
 			break;
 		}
 	} while(op!=9);
 	free(pacientes.itens);
 	free(medicos.itens);
+	free(consultas.itens);
 }
