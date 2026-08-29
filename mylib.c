@@ -625,6 +625,8 @@ void add_consulta(VetConsultas *consultas, VetPacientes *pacientes, VetMedicos *
     int teste, id = 0; //teste
     int id_paciente = search_paciente(pacientes);
     int id_medico = pesquisar_medicos(medicos);
+    Data data;
+    add_data(&data);
     printf("Digite um teste:\n");
     scanf("%d", &teste);
     
@@ -633,8 +635,42 @@ void add_consulta(VetConsultas *consultas, VetPacientes *pacientes, VetMedicos *
     
     file = fopen("consultas.txt", "a");
     
-    fprintf(file, "%d | %d | %d | %d | %d | %d | %d\n", id, pacientes->itens[id_paciente].id, medicos->itens[id_medico].id, teste, teste, teste, teste);
+    fprintf(file, "%d | %d | %d | %d | %d | %d | %d\n", id, pacientes->itens[id_paciente].id, medicos->itens[id_medico].id, con_data(data), teste, teste, teste);
     
     fclose(file);
     
+}
+
+int con_data(Data data){
+    data.ano *= 10000;
+    data.mes *= 100;
+    return data.dia + data.mes + data.ano;
+}
+void add_data(Data *data){
+    while(1){
+        printf("Digite um dia para consulta:\n");
+        scanf("%d", &data->dia);
+        if(30 >= data->dia && data->dia >=1){
+            break;
+        }else{printf("Erro, digite um dia valido\n");}
+    }
+    while(1){
+        printf("Digite um mes para consulta:\n");
+        scanf("%d", &data->mes);
+        if(12 >= data->mes && data->mes >=1){
+            break;
+        }else{printf("Erro, digite um mes valido\n");}
+    }
+    while(1){
+        printf("Digite um ano para consulta:\n");
+        scanf("%d", &data->ano);
+        if(data->ano >=2026){
+            break;
+        }else{printf("Erro, digite um ano valido\n");}
+    }
+}
+void descon_data(Data *data, int n){
+    data->ano = n / 10000; 
+    data->mes = n % 10000 / 100;
+    data->dia = n % 10000 % 100;
 }
