@@ -102,7 +102,7 @@ void read_pacientes(VetPacientes *pacientes) {
 			return;
 		}
 
-		file = fopen("medicos.txt","w");
+		file = fopen("pacientes.txt","w");
 
 		if(file == NULL) {
 			printf("Erro ao abrir o arquivo\n");
@@ -619,4 +619,22 @@ void listar_medicos(VetMedicos *medicos) {
     	}
 	}
 	
+}
+
+void add_consulta(VetConsultas *consultas, VetPacientes *pacientes, VetMedicos *medicos){
+    int teste, id = 0; //teste
+    int id_paciente = search_paciente(pacientes);
+    int id_medico = pesquisar_medicos(medicos);
+    printf("Digite um teste:\n");
+    scanf("%d", &teste);
+    
+    
+    FILE *file;
+    
+    file = fopen("consultas.txt", "a");
+    
+    fprintf(file, "%d | %d | %d | %d | %d | %d | %d\n", id, pacientes->itens[id_paciente].id, medicos->itens[id_medico].id, teste, teste, teste, teste);
+    
+    fclose(file);
+    
 }
