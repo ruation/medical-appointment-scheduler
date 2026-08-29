@@ -532,39 +532,56 @@ void listar_medicos(VetMedicos *medicos) {
 
 	printf("Quantidade total de medicos cadastrados no sistema: %d\n", medicos->qtd);
 
-	while(1) {
-		//Pede a especialidade do medico e depois converte para a função ler_especialidade retornar um valor valido
-		while(1) {
-			printf("Escolha uma das seguintes especialidade do médico para filtrar e listar\nClinico: 1\nPediatra: 2\nDermatologista: 3\nCardiologista: 4\nOutra: 5\n");
+    while(1) {
+			printf("1 - listar todos\n 2 - especialidade especifica\n");
 			scanf("%d",&choise);
-			if(choise>=1 && 5>=choise) {
+			if(choise==1 || 2==choise) {
 				break;
 			}
 			else {
 				printf("Digite uma opção válida\n");
 			}
 		}
-
-		choise--;
-
-		for(i = 0; i<medicos->qtd; i++) {
-			if(choise == medicos->itens[i].especialidade) {
-				mostrar_medico(medicos->itens[i]);
-				flag++;
-			}
+	if(choise == 1){
+	    for(i = 0; i<medicos->qtd; i++) {
+			mostrar_medico(medicos->itens[i]);
 		}
-		//Caso não exista um medico com essa especialidade, retorna uma mensagem
-		if(flag==0) {
-			printf("Nenhum medico dessa especialidade cadastrado\n");
-			while(1) {
-				printf("Deseja filtrar por outra especialdiade?\nDigite y para confirmar ou n para cancelar\n");
-				scanf(" %c", &choise);
-				if(choise == 'n')return;
-				if(choise == 'y')break;
-			}
-		}
-		else {
-			return;
-		}
+	}else{
+	    while(1) {
+    		//Pede a especialidade do medico e depois converte para a função ler_especialidade retornar um valor valido
+    		while(1) {
+    			printf("Escolha uma das seguintes especialidade do médico para filtrar e listar\nClinico: 1\nPediatra: 2\nDermatologista: 3\nCardiologista: 4\nOutra: 5\n");
+    			scanf("%d",&choise);
+    			if(choise>=1 && 5>=choise) {
+    				break;
+    			}
+    			else {
+    				printf("Digite uma opção válida\n");
+    			}
+    		}
+    
+    		choise--;
+    
+    		for(i = 0; i<medicos->qtd; i++) {
+    			if(choise == medicos->itens[i].especialidade) {
+    				mostrar_medico(medicos->itens[i]);
+    				flag++;
+    			}
+    		}
+    		//Caso não exista um medico com essa especialidade, retorna uma mensagem
+    		if(flag==0) {
+    			printf("Nenhum medico dessa especialidade cadastrado\n");
+    			while(1) {
+    				printf("Deseja filtrar por outra especialdiade?\nDigite y para confirmar ou n para cancelar\n");
+    				scanf(" %c", &choise);
+    				if(choise == 'n')return;
+    				if(choise == 'y')break;
+    			}
+    		}
+    		else {
+    			return;
+    		}
+    	}
 	}
+	
 }
