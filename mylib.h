@@ -79,6 +79,7 @@ int search_paciente(VetPacientes *pacientes);
 void read_pacientes(VetPacientes *pacientes);
 int realocar_pacientes(VetPacientes *pacientes);
 void remover_paciente(VetPacientes *pacientes);
+void list_pacientes(VetPacientes *pacientes);
 
 //Prototipos de funções de medicos
 

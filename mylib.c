@@ -156,6 +156,14 @@ void remover_paciente(VetPacientes *pacientes){
     
 }
 
+void list_pacientes(VetPacientes *pacientes){
+    for(int i = 0; i < pacientes->qtd; i++){
+        printf("id: %d nome: %s contato: %s\n", pacientes->itens[i].id, pacientes->itens[i].nome, pacientes->itens[i].contato);
+    }
+}
+
+
+
 
 //Função para preencher horario mais facilmente
 void receber_hora(Horario *horario) {
