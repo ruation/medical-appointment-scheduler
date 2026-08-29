@@ -72,6 +72,7 @@ void receber_hora(Horario *horario);
 int con_horas(Horario horario);
 void desconverter_horas(int n, Horario *horario);
 int contar_linhas(FILE *arquivo);
+void veri_horario(Horario *inicio, Horario *fim, int n);
 int verify_name(const char *str);
 int verify_email(const char *str);
 
@@ -91,3 +92,4 @@ void add_medico(VetMedicos *medicos);
 void mostrar_medico(Medico medico);
 int pesquisar_medicos(VetMedicos *medicos);
 void remover_medico(VetMedicos *medicos);
+void listar_medicos(VetMedicos *medicos);

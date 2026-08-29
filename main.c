@@ -44,7 +44,7 @@ int main()
 		break;
 		case 2:
 			do {
-				printf("---- menu medicos ----\n1 - adicionar\n2 - pesquisar medicos\n3 - remover medico\n9 - voltar\n");
+				printf("---- menu medicos ----\n1 - adicionar\n2 - pesquisar medicos\n3 - remover medico\n4 - listar medicos\n9 - voltar\n");
 				scanf("%d", &op1);
 				switch(op1) {
 				case 1:
@@ -55,6 +55,10 @@ int main()
 				    break;
 				case 3:
 				    remover_medico(&medicos);
+				    break;
+				case 4:
+				    listar_medicos(&medicos);
+				    break;
 				default:
 					break;
 				}

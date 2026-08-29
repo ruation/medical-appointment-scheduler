@@ -27,40 +27,44 @@ void add_paciente(VetPacientes *pacientes){
     
     	
 	int maior = 0;
-	if(pacientes->qtd > 0){
-	    for(int i = 0; i<pacientes->qtd; i++){
-	        if(pacientes->itens[i].id > maior){maior = pacientes->itens[i].id;}
-	    }
+	if(pacientes->qtd > 0) {
+		for(int i = 0; i<pacientes->qtd; i++) {
+			if(pacientes->itens[i].id > maior) {
+				maior = pacientes->itens[i].id;
+			}
+		}
 	}
-	
-    
-    printf("Adicionar o paciente %s, contato: %s com o id: %d? (y/n)\n", nome, contato, maior+1);
-    scanf(" %c", &choice);
-    
-    if(choice == 'n'){return;}
-    printf("Adicionando...\n\n");
-    
+
+
+	printf("Adicionar o paciente %s, contato: %s com o id: %d? (y/n)\n", nome, contato, maior+1);
+	scanf(" %c", &choice);
+
+	if(choice == 'n') {
+		return;
+	}
+	printf("Adicionando...\n\n");
+
 
 	file = fopen("pacientes.txt","a"); //a-append
 
-	if(file == NULL){
-	    printf("Erro ao abrir arquivo");
-	    return;
+	if(file == NULL) {
+		printf("Erro ao abrir arquivo");
+		return;
 	}
 
-	//fprintf é uma função para escrever no arquivo. 
+	//fprintf é uma função para escrever no arquivo.
 	fprintf(file, "%s | %s | %d\n", nome, contato, maior+1);
-	
+
 	fclose(file);
-	
+
 	strcpy(pacientes->itens[pacientes->qtd].nome, nome);
 	strcpy(pacientes->itens[pacientes->qtd].contato, contato);
 	pacientes->itens[pacientes->qtd].id = maior+1;
-	
+
 	pacientes->qtd++;
-	
+
 	printf("Paciente cadastrado.\n");
-	
+
 
 }
 
@@ -82,57 +86,61 @@ int search_paciente(VetPacientes *pacientes) {
     return -1;
 }
 
-void read_pacientes(VetPacientes *pacientes){
-    FILE *file;
-    
-    int i = 0;
+void read_pacientes(VetPacientes *pacientes) {
+	FILE *file;
+
+	int i = 0;
 	file = fopen("pacientes.txt", "r");
 
-	if(file == NULL){
-	    pacientes->qtd = 0; pacientes->cap = 10;
-	    pacientes->itens = (Paciente *) malloc(sizeof(Paciente) * pacientes->cap);
-	    
+	if(file == NULL) {
+		pacientes->qtd = 0;
+		pacientes->cap = 10;
+		pacientes->itens = (Paciente *) malloc(sizeof(Paciente) * pacientes->cap);
+
 		if(pacientes->itens == NULL) {
 			printf("Erro de memoria\n");
 			return;
 		}
-		
+
 		file = fopen("medicos.txt","w");
-		
+
 		if(file == NULL) {
 			printf("Erro ao abrir o arquivo\n");
 		}
 		fclose(file);
-	    
-	    return;
+
+		return;
 	}
-	
-	pacientes->qtd = contar_linhas(file); pacientes->cap = pacientes->qtd + 10;
+
+	pacientes->qtd = contar_linhas(file);
+	pacientes->cap = pacientes->qtd + 10;
 	pacientes->itens = (Paciente *) malloc(sizeof(Paciente) * pacientes->cap);
-	
+
 	if(pacientes->itens == NULL) {
 		printf("Erro ao realocar o vetor\n");
 		fclose(file);
 		return;
 	}
-	
-	
-	while(fscanf(file, "%63[^|] | %s | %d\n", &pacientes->itens[i].nome, &pacientes->itens[i].contato, &pacientes->itens[i].id) != EOF){i++;}
+
+
+	while(fscanf(file, "%63[^|] | %s | %d\n", &pacientes->itens[i].nome, &pacientes->itens[i].contato, &pacientes->itens[i].id) != EOF) {
+		i++;
+	}
 	pacientes->qtd = i;
-	
+
 	fclose(file);
 }
 
-int realocar_pacientes(VetPacientes *pacientes){
-    if(pacientes->qtd == pacientes->cap){
-        pacientes->itens = (Paciente *) realloc(pacientes->itens, sizeof(Paciente) * (pacientes->cap+10));
-        if(pacientes->itens == NULL){
-            printf("Erro de memoria!\n");
-            return 0;
-        }
-        pacientes->cap += 10;
-    }
-    return 1;
+int realocar_pacientes(VetPacientes *pacientes) {
+	if(pacientes->qtd == pacientes->cap) {
+		pacientes->itens = (Paciente *) realloc(pacientes->itens, sizeof(Paciente) * (pacientes->cap+10));
+		if(pacientes->itens == NULL) {
+			printf("Erro de memoria!\n");
+			return 0;
+		}
+		pacientes->cap += 10;
+	}
+	return 1;
 }
 
 void remover_paciente(VetPacientes *pacientes){
@@ -223,6 +231,47 @@ void receber_hora(Horario *horario) {
 	printf("Horario escolhido: %d:%d\n",horario->horas,horario->minutos);
 }
 
+//Trata ainda mais os dados de inicio e fim de uma consulta ou turno
+//Para assim conseguir padronizar um horario correto
+void veri_horario(Horario *inicio, Horario *fim, int n) {
+	//n é a variavel que é inserido direto no código, caso 1 trata para medicos e caso 2 para consultas. Default é por segurança que o código não quebre
+	int con_inicio, con_fim;
+	//Converte facilitar o trabalho
+	while(1) {
+	    con_inicio = (inicio->horas * 100) + inicio->minutos;
+		con_fim  = (fim->horas * 100) + fim->minutos;
+		
+		if(con_inicio>=con_fim) {
+			printf("Horario invalido, o horario de inicio é igual ao do fim. Ou o inicio é depois do fim\nCadastre novos horarios\n");
+			receber_hora(inicio);
+			receber_hora(fim);
+		} else {
+			switch(n) {
+			case 1:
+				if(con_fim - con_inicio != 400) {
+					printf("Cada turno do medico deve durar exatamente 4 horas\nCadastre um turno válido\n");
+					receber_hora(inicio);
+					receber_hora(fim);
+				} else {
+					return;
+				}
+				break;
+			case 2:
+				if(con_fim - con_inicio != 100) {
+					printf("Cada consulta deve durar exatamente 1 horas\nCadastre um horario de consulta válido\n");
+					receber_hora(inicio);
+					receber_hora(fim);
+				} else {
+					return;
+				}
+				break;
+			default:
+				printf("Erro\n");
+				return;
+			}
+		}
+	}
+}
 //Tratando os dados para alocar mais facil as horas
 //Para otimizar o espaço, isso serve para converter horario que seria duas variaveis em uma só
 //Assim dá para guardar mais facilmente no arquivo
@@ -299,7 +348,7 @@ const char* ler_especialidade(int n) {
 	case 4:
 		return "Outro";
 	default:
-	    return "Especialidade invalida";
+		return "Especialidade invalida";
 	}
 
 }
@@ -381,16 +430,16 @@ void add_medico(VetMedicos *medicos) {
 	char choise;
 	//medico é usado como uma variavel de espaço temporario, só quando é confirmado adição que os dados são guardados
 	Medico medico;
-	
+
 	//testa se é necessario aumentar o vetor de medicos
 	choise1 = realocar_medicos(medicos);
-	
+
 	if(choise1==0) {
 		printf("Não há mais memória para armazenar novos medicos. Encerrando função adicionar.\n");
 		return;
 	}
-    
-    //Percorre todo vetor de medicos, no final pega o maior id existente e adiciana +1. Caso não haja nenhum medico, o novo recebe 1
+
+	//Percorre todo vetor de medicos, no final pega o maior id existente e adiciana +1. Caso não haja nenhum medico, o novo recebe 1
 	if(medicos->qtd > 0) {
 		for(int i=0; i<medicos->qtd; i++) {
 			if(medicos->itens[i].id>=maior) {
@@ -404,7 +453,7 @@ void add_medico(VetMedicos *medicos) {
 	getchar();
 	fgets(medico.nome,64, stdin);
 	medico.nome[strcspn(medico.nome, "\n")] = '\0';
-    //Recebe a especialidade do medico e converte para ficar da maneira correta
+	//Recebe a especialidade do medico e converte para ficar da maneira correta
 	while(1) {
 		printf("Escolha uma das seguintes especialidade do médico\nClinico: 1\nPediatra: 2\nDermatologista: 3\nCardiologista: 4\nOutra: 5\n");
 		scanf("%d",&choise1);
@@ -417,26 +466,30 @@ void add_medico(VetMedicos *medicos) {
 	}
 
 	medico.especialidade = choise1 - 1;
-    
+
+	printf("Adendo: cada turno do medico deve ser de exatamente 4 horas de duração\n");
+
 	printf("    Preencha o horário da consulta do inicio da manhã\n");
 	receber_hora(&medico.inicioManha);
 	printf("    Preencha o horário de consulta do fim da manhã\n");
 	receber_hora(&medico.fimManha);
+	veri_horario(&medico.inicioManha,&medico.fimManha,1);
 	printf("    Preencha o horário de consulta do inicio da tarde\n");
 	receber_hora(&medico.inicioTarde);
 	printf("    Preencha o horário de consulta do fim da tarde\n");
 	receber_hora(&medico.fimTarde);
+	veri_horario(&medico.inicioTarde,&medico.fimTarde,1);
 
 	printf("        Deseja adicionar\n");
 	mostrar_medico(medico);
 
-    while(1){
-        printf("Digite y para confirmar ou n para cancelar\n");
-	    scanf(" %c", &choise);
-    	if(choise == 'n')return;
-    	if(choise == 'y')break;
-    }
-    //Cria agora o arquivo, caso fosse no inicio e o usuario não criasse o medico, o arquivo não seria fechado. Assim podendo corromper o arquivo
+	while(1) {
+		printf("Digite y para confirmar ou n para cancelar\n");
+		scanf(" %c", &choise);
+		if(choise == 'n')return;
+		if(choise == 'y')break;
+	}
+	//Cria agora o arquivo, caso fosse no inicio e o usuario não criasse o medico, o arquivo não seria fechado. Assim podendo corromper o arquivo
 	FILE *file;
 
 	file = fopen("medicos.txt", "a");
@@ -448,62 +501,122 @@ void add_medico(VetMedicos *medicos) {
 	fprintf(file, "%d|%s|%d|%d|%d|%d|%d\n",medico.id, medico.nome, medico.especialidade,con_horas(medico.inicioManha),con_horas(medico.fimManha),con_horas(medico.inicioTarde),con_horas(medico.fimTarde));
 
 	fclose(file);
-    
-    //Como medicos->itens é do tipo Medico, ele consegue receber diretamente a variavel medico
+
+	//Como medicos->itens é do tipo Medico, ele consegue receber diretamente a variavel medico
 	medicos->itens[medicos->qtd] = medico;
 
 	medicos->qtd++;
 }
 
-int pesquisar_medicos(VetMedicos *medicos){
-    int numero, i;
-    printf("Digite o id do medico desejado\n");
-    scanf("%d", &numero);
-    //Percorre todo vetor de medicos até encontrar o medico com id escolhido pelo usuario.
-    
-    for(i = 0; i < medicos->qtd && numero!=medicos->itens[i].id; i++);
-    //Testa se encontrou o medico
-    if( i < medicos->itens[i].id && numero!=0){
-        if(numero == medicos->itens[i].id){
-            printf("Medico encontrado\n");
-            mostrar_medico(medicos->itens[i]);
-            return i;
-        }
-    }else{
-        printf("Medico não encontrado no sistema\n");
-        return -1;
-    }
+int pesquisar_medicos(VetMedicos *medicos) {
+	int numero, i;
+	printf("Digite o id do medico desejado\n");
+	scanf("%d", &numero);
+	//Percorre todo vetor de medicos até encontrar o medico com id escolhido pelo usuario.
+
+	for(i = 0; i < medicos->qtd && numero!=medicos->itens[i].id; i++);
+	//Testa se encontrou o medico
+	if( i < medicos->itens[i].id && numero!=0) {
+		if(numero == medicos->itens[i].id) {
+			printf("Medico encontrado\n");
+			mostrar_medico(medicos->itens[i]);
+			return i;
+		}
+	} else {
+		printf("Medico não encontrado no sistema\n");
+		return -1;
+	}
 }
 
-void remover_medico(VetMedicos *medicos){
-    int i, id;
-    char choise;
-    id = pesquisar_medicos(medicos);
-    //Aproveita a função anterior para já pegar o id do medico selecionado para ser deletado
-    if(id==-1)return;
-    printf("Deseja remover esse medico?\n");
-    
-    while(1){
-        printf("Digite y para confirmar ou n para cancelar\n");
-	    scanf(" %c", &choise);
-    	if(choise == 'n')return;
-    	if(choise == 'y')break;
-    }
-    
-    FILE *file;
-    //Remove o medico
-    //Basicamente joga todos elemetos a direita dele para esquerda. Sobreescrevendo o elemento apagado
-    for(i = id; i < medicos->qtd-1 ;i++){
-        medicos->itens[i] = medicos->itens[i + 1];
-    }
-    medicos->qtd--;
-    
-    file = fopen("medicos.txt", "w");
-    //Limpa todo o arquivo e em seguida preenche novamente com os dados restantes do vetor
-    for(i = 0;i<medicos->qtd; i++){
-        fprintf(file, "%d|%s|%d|%d|%d|%d|%d\n",medicos->itens[i].id, medicos->itens[i].nome, medicos->itens[i].especialidade,con_horas(medicos->itens[i].inicioManha),con_horas(medicos->itens[i].fimManha),con_horas(medicos->itens[i].inicioTarde),con_horas(medicos->itens[i].fimTarde));
-    }
-    
+void remover_medico(VetMedicos *medicos) {
+	int i, id;
+	char choise;
+	id = pesquisar_medicos(medicos);
+	//Aproveita a função anterior para já pegar o id do medico selecionado para ser deletado
+	if(id==-1)return;
+	printf("Deseja remover esse medico?\n");
+
+	while(1) {
+		printf("Digite y para confirmar ou n para cancelar\n");
+		scanf(" %c", &choise);
+		if(choise == 'n')return;
+		if(choise == 'y')break;
+	}
+
+	FILE *file;
+	//Remove o medico
+	//Basicamente joga todos elemetos a direita dele para esquerda. Sobreescrevendo o elemento apagado
+	for(i = id; i < medicos->qtd-1 ; i++) {
+		medicos->itens[i] = medicos->itens[i + 1];
+	}
+	medicos->qtd--;
+
+	file = fopen("medicos.txt", "w");
+	//Limpa todo o arquivo e em seguida preenche novamente com os dados restantes do vetor
+	for(i = 0; i<medicos->qtd; i++) {
+		fprintf(file, "%d|%s|%d|%d|%d|%d|%d\n",medicos->itens[i].id, medicos->itens[i].nome, medicos->itens[i].especialidade,con_horas(medicos->itens[i].inicioManha),con_horas(medicos->itens[i].fimManha),con_horas(medicos->itens[i].inicioTarde),con_horas(medicos->itens[i].fimTarde));
+	}
+
 	fclose(file);
 	printf("Removendo medico...\n");
+}
+//Lista medicos filtrando por especialidade e mostra a quantidade de medicos cadastrados
+void listar_medicos(VetMedicos *medicos) {
+	int choise,i, flag = 0;
+	char choise1;
+
+	printf("Quantidade total de medicos cadastrados no sistema: %d\n", medicos->qtd);
+
+    while(1) {
+			printf("1 - listar todos\n 2 - especialidade especifica\n");
+			scanf("%d",&choise);
+			if(choise==1 || 2==choise) {
+				break;
+			}
+			else {
+				printf("Digite uma opção válida\n");
+			}
+		}
+	if(choise == 1){
+	    for(i = 0; i<medicos->qtd; i++) {
+			mostrar_medico(medicos->itens[i]);
+		}
+	}else{
+	    while(1) {
+    		//Pede a especialidade do medico e depois converte para a função ler_especialidade retornar um valor valido
+    		while(1) {
+    			printf("Escolha uma das seguintes especialidade do médico para filtrar e listar\nClinico: 1\nPediatra: 2\nDermatologista: 3\nCardiologista: 4\nOutra: 5\n");
+    			scanf("%d",&choise);
+    			if(choise>=1 && 5>=choise) {
+    				break;
+    			}
+    			else {
+    				printf("Digite uma opção válida\n");
+    			}
+    		}
+    
+    		choise--;
+    
+    		for(i = 0; i<medicos->qtd; i++) {
+    			if(choise == medicos->itens[i].especialidade) {
+    				mostrar_medico(medicos->itens[i]);
+    				flag++;
+    			}
+    		}
+    		//Caso não exista um medico com essa especialidade, retorna uma mensagem
+    		if(flag==0) {
+    			printf("Nenhum medico dessa especialidade cadastrado\n");
+    			while(1) {
+    				printf("Deseja filtrar por outra especialdiade?\nDigite y para confirmar ou n para cancelar\n");
+    				scanf(" %c", &choise);
+    				if(choise == 'n')return;
+    				if(choise == 'y')break;
+    			}
+    		}
+    		else {
+    			return;
+    		}
+    	}
+	}
+	
 }
