@@ -22,7 +22,7 @@ int main()
 		switch(op) {
 		case 1:
 			do {
-				printf("---- menu pacientes ----\n1 - adicionar\n2 - procurar paciente\n3 - remover paciente\n9 - voltar\n");
+				printf("---- menu pacientes ----\n1 - adicionar\n2 - procurar paciente\n3 - remover paciente\n4 - listar_pacientes\n9 - voltar\n");
 				scanf("%d", &op1);
 				switch(op1) {
 				case 1:
@@ -33,6 +33,9 @@ int main()
 					break;
 				case 3:
 				    remover_paciente(&pacientes);
+				    break;
+				case 4:
+				    list_pacientes(&pacientes);
 				    break;
 				default:
 					break;
