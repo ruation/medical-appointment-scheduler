@@ -73,6 +73,8 @@ int con_horas(Horario horario);
 void desconverter_horas(int n, Horario *horario);
 int contar_linhas(FILE *arquivo);
 void veri_horario(Horario *inicio, Horario *fim, int n);
+int verify_name(const char *str);
+int verify_email(const char *str);
 
 //Prototipos de funções de pacientes
 void add_paciente(VetPacientes *pacientes);
@@ -80,6 +82,7 @@ int search_paciente(VetPacientes *pacientes);
 void read_pacientes(VetPacientes *pacientes);
 int realocar_pacientes(VetPacientes *pacientes);
 void remover_paciente(VetPacientes *pacientes);
+void list_pacientes(VetPacientes *pacientes);
 
 //Prototipos de funções de medicos
 

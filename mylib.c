@@ -1,29 +1,31 @@
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <stdlib.h>
 #include "mylib.h"
 
-void add_paciente(VetPacientes *pacientes) {
-	FILE *file;
-	char nome[64];
-	char contato[64];
-	char choice;
-
-	int flag = realocar_pacientes(pacientes);
-
-	if(flag == 0) {
-		return;
-	}
-
-	printf("Digite o nome do paciente: ");
-	getchar();
-	fgets(nome,64, stdin);
-	nome[strcspn(nome, "\n")] = '\0';
-	printf("Digite o e-mail do paciente: ");
-	fgets(contato,64, stdin);
-	contato[strcspn(contato, "\n")] = '\0';
-
-
+void add_paciente(VetPacientes *pacientes){
+    FILE *file;
+    char nome[64];char contato[64]; char choice;
+    
+    int flag = realocar_pacientes(pacientes);
+    
+    if(flag == 0){
+        return;
+    }
+    
+    do{printf("Digite o nome do paciente: ");
+    getchar();
+    fgets(nome,64, stdin);
+    nome[strcspn(nome, "\n")] = '\0';
+    }while(verify_name(nome)==0);
+    
+    do{printf("Digite o e-mail do paciente: ");
+    fgets(contato,64, stdin);
+    contato[strcspn(contato, "\n")] = '\0';
+    }while(verify_email(contato)==0);
+    
+    	
 	int maior = 0;
 	if(pacientes->qtd > 0) {
 		for(int i = 0; i<pacientes->qtd; i++) {
@@ -70,18 +72,18 @@ int search_paciente(VetPacientes *pacientes) {
 	int id, i;
 	if(pacientes->qtd == 0) {
 		printf("Não existe pacientes cadastrados.\n");
-		return 0;
+		return -1;
 	}
 	printf("Digite o id do paciente: ");
 	scanf("%d", &id);
-	for(i=0; i<pacientes->qtd; i++) {
-		if(pacientes->itens[i].id == id) {
-			printf("id: %d nome: %s contato: %s\n", pacientes->itens[i].id, pacientes->itens[i].nome, pacientes->itens[i].contato);
-			return i;
-		}
-	}
-	printf("Paciente não encontrado no sistema.\n");
-	return 0;
+    for(i=0; i<pacientes->qtd; i++){
+        if(pacientes->itens[i].id == id){
+            printf("id: %d nome: %s contato: %s\n", pacientes->itens[i].id, pacientes->itens[i].nome, pacientes->itens[i].contato);
+            return i;
+        }
+    }
+    printf("Paciente não encontrado no sistema.\n");
+    return -1;
 }
 
 void read_pacientes(VetPacientes *pacientes) {
@@ -141,32 +143,65 @@ int realocar_pacientes(VetPacientes *pacientes) {
 	return 1;
 }
 
-void remover_paciente(VetPacientes *pacientes) {
-	int id = search_paciente(pacientes);
-	char choice;
-	if(id == 0) {
-		return;
-	}
-	printf("Deseja remover esse paciente? (y/n)\n");
-	scanf(" %c", &choice);
-	if(choice == 'n')return;
-
-	FILE *file;
-
-	for(int i = id; i<pacientes->qtd-1; i++) {
-		pacientes->itens[i] = pacientes->itens[i+1];
-	}
-	pacientes->qtd--;
-
-	file = fopen("pacientes.txt", "w");
-
-	for(int i = 0; i<pacientes->qtd; i++) {
-		fprintf(file, "%s | %s | %d\n", pacientes->itens[i].nome, pacientes->itens[i].contato, pacientes->itens[i].id);
-	}
-	fclose(file);
-	printf("Paciente removido.\n");
-
+void remover_paciente(VetPacientes *pacientes){
+    int id = search_paciente(pacientes);
+    char choice;
+    if(id == -1){return;}
+    printf("Deseja remover esse paciente? (y/n)\n");
+    scanf(" %c", &choice);
+    if(choice == 'n')return;
+    
+    FILE *file;
+    
+    for(int i = id; i<pacientes->qtd-1; i++){
+        pacientes->itens[i] = pacientes->itens[i+1];
+    }
+    pacientes->qtd--;
+    
+    file = fopen("pacientes.txt", "w");
+    
+    for(int i = 0; i<pacientes->qtd; i++){
+        fprintf(file, "%s | %s | %d\n", pacientes->itens[i].nome, pacientes->itens[i].contato, pacientes->itens[i].id);
+    }
+    fclose(file);
+    printf("Paciente removido.\n");
+    
 }
+
+void list_pacientes(VetPacientes *pacientes){
+    for(int i = 0; i < pacientes->qtd; i++){
+        printf("id: %d nome: %s contato: %s\n", pacientes->itens[i].id, pacientes->itens[i].nome, pacientes->itens[i].contato);
+    }
+}
+
+int verify_name(const char *str){
+    if (*str == '\0') return 0; // return 0 if the string is empty
+    for(int i = 0; str[i] != '\0'; i++){
+        if(isdigit(str[i])){printf("O nome não pode conter números.\n"); return 0;}
+    }
+    return 1; //return 1 if the string is ok.
+}
+
+int verify_email(const char *str){
+    if(*str == '\0') return 0; // return 0 if str is empty
+    int qtd_arroba = 0, flag_arroba = -1, flag_ponto = -1, i; 
+    for(i = 0; str[i] != '\0'; i++){
+        if(str[i] == '@'){flag_arroba = i; qtd_arroba++;
+            if(i == 0){printf("e-mail inválido.\n"); return 0;} // the first char cannot be an "@"
+            else if(str[i-1] == '.' || str[i+1] == '.'){printf("e-mail inválido.\n"); return 0;} // the last char before "@" or the first one after "@" cannot be an "."
+        }
+        else if(str[i] == '.'){flag_ponto = i;
+            if(i == 0 || str[i+1] == '.'){printf("e-mail inválido.\n"); return 0;} // the first char cannot be an "." and a email cannot have two "." together.
+        }
+    }
+    
+    if(qtd_arroba != 1 || flag_ponto == -1 || flag_ponto < flag_arroba || str[i-1] == '.'){
+        printf("e-mail inválido.\n"); return 0; // e-mail only have 1 "@" and need at least 1 "." after the "@". The last char cannot be an "."
+    }
+    return 1;
+    
+}
+
 
 
 //Função para preencher horario mais facilmente
