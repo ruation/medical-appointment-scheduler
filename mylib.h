@@ -72,6 +72,8 @@ void receber_hora(Horario *horario);
 int con_horas(Horario horario);
 void desconverter_horas(int n, Horario *horario);
 int contar_linhas(FILE *arquivo);
+int verify_name(const char *str);
+int verify_email(const char *str);
 
 //Prototipos de funções de pacientes
 void add_paciente(VetPacientes *pacientes);

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <stdlib.h>
 #include "mylib.h"
 
@@ -13,13 +14,16 @@ void add_paciente(VetPacientes *pacientes){
         return;
     }
     
-    printf("Digite o nome do paciente: ");
+    do{printf("Digite o nome do paciente: ");
     getchar();
     fgets(nome,64, stdin);
     nome[strcspn(nome, "\n")] = '\0';
-    printf("Digite o e-mail do paciente: ");
+    }while(verify_name(nome)==0);
+    
+    do{printf("Digite o e-mail do paciente: ");
     fgets(contato,64, stdin);
     contato[strcspn(contato, "\n")] = '\0';
+    }while(verify_email(contato)==0);
     
     	
 	int maior = 0;
@@ -162,6 +166,33 @@ void list_pacientes(VetPacientes *pacientes){
     }
 }
 
+int verify_name(const char *str){
+    if (*str == '\0') return 0; // return 0 if the string is empty
+    for(int i = 0; str[i] != '\0'; i++){
+        if(isdigit(str[i])){printf("O nome não pode conter números.\n"); return 0;}
+    }
+    return 1; //return 1 if the string is ok.
+}
+
+int verify_email(const char *str){
+    if(*str == '\0') return 0; // return 0 if str is empty
+    int qtd_arroba = 0, flag_arroba = -1, flag_ponto = -1, i; 
+    for(i = 0; str[i] != '\0'; i++){
+        if(str[i] == '@'){flag_arroba = i; qtd_arroba++;
+            if(i == 0){printf("e-mail inválido.\n"); return 0;} // the first char cannot be an "@"
+            else if(str[i-1] == '.' || str[i+1] == '.'){printf("e-mail inválido.\n"); return 0;} // the last char before "@" or the first one after "@" cannot be an "."
+        }
+        else if(str[i] == '.'){flag_ponto = i;
+            if(i == 0 || str[i+1] == '.'){printf("e-mail inválido.\n"); return 0;} // the first char cannot be an "." and a email cannot have two "." together.
+        }
+    }
+    
+    if(qtd_arroba != 1 || flag_ponto == -1 || flag_ponto < flag_arroba || str[i-1] == '.'){
+        printf("e-mail inválido.\n"); return 0; // e-mail only have 1 "@" and need at least 1 "." after the "@". The last char cannot be an "."
+    }
+    return 1;
+    
+}
 
 
 
