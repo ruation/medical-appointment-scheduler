@@ -622,20 +622,22 @@ void listar_medicos(VetMedicos *medicos) {
 }
 
 void add_consulta(VetConsultas *consultas, VetPacientes *pacientes, VetMedicos *medicos){
-    int teste, id = 0; //teste
-    int id_paciente = search_paciente(pacientes);
-    int id_medico = pesquisar_medicos(medicos);
-    Data data;
+    int status = 0, id = 0; //teste
+    int id_paciente, id_medico;
+    do{id_paciente = search_paciente(pacientes);}while(id_paciente==-1);
+    do{id_medico = pesquisar_medicos(medicos);}while(id_medico==-1);
+    Data data; Horario inicio, fim;
     add_data(&data);
-    printf("Digite um teste:\n");
-    scanf("%d", &teste);
-    
+    printf("Horario de inicio. ");
+    receber_hora(&inicio); 
+    printf("Horario de fim. ");receber_hora(&fim);
+    veri_horario(&inicio, &fim, 2);
     
     FILE *file;
     
     file = fopen("consultas.txt", "a");
     
-    fprintf(file, "%d | %d | %d | %d | %d | %d | %d\n", id, pacientes->itens[id_paciente].id, medicos->itens[id_medico].id, con_data(data), teste, teste, teste);
+    fprintf(file, "%d | %d | %d | %d | %d | %d | %d\n", id, pacientes->itens[id_paciente].id, medicos->itens[id_medico].id, con_data(data), con_horas(inicio), con_horas(fim), status);
     
     fclose(file);
     
