@@ -1,3 +1,7 @@
+#ifndef MYLIB_H
+#define MYLIB_H
+
+#include <stdio.h>
 typedef struct {
 	int dia, mes, ano;
 } Data;
@@ -107,3 +111,6 @@ int realocar_consultas(VetConsultas *consultas);
 const char* ler_status(int n);
 void printar_consultas(Consulta *consultas);
 int search_consultas(VetConsultas *consultas);
+void del_consulta(VetConsultas *consultas);
+void update_status(VetConsultas *consultas);
+#endif
