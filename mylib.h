@@ -97,6 +97,8 @@ void listar_medicos(VetMedicos *medicos);
 //Prototipos de funções de consultas 
 
 void add_consulta(VetConsultas *consultas, VetPacientes *pacientes, VetMedicos *medicos);
+void read_consultas(VetConsultas *consultas);
+int realocar_consultas(VetConsultas *consultas);
 int con_data(Data data);
 void add_data(Data *data);
 void descon_data(Data *data, int n);

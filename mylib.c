@@ -676,3 +676,69 @@ void descon_data(Data *data, int n){
     data->mes = n % 10000 / 100;
     data->dia = n % 10000 % 100;
 }
+
+void read_consultas(VetConsultas *consultas){
+	FILE *file;
+
+	file = fopen("consultas.txt","r");
+
+	if(file == NULL) {
+
+		consultas->qtd = 0, consultas->cap = 10;
+		consultas->itens = (Consulta *) malloc(sizeof(Consulta) * consultas->cap);
+		if(consultas->itens == NULL) {
+			printf("Erro de memoria\n");
+			return;
+		}
+
+		//cria um novo arquivo
+		file = fopen("consultas.txt","w");
+		if(file == NULL) {
+			printf("Erro ao abrir o arquivo\n");
+		}
+		fclose(file);
+		return;
+
+	} else {
+
+		int n1, n2,n3, i = 0;
+
+		consultas->qtd = contar_linhas(file);
+
+		consultas->cap = consultas->qtd + 10;
+		consultas->itens = (Consulta *) malloc(sizeof(Consulta) * consultas->cap);
+
+		if(consultas->itens == NULL) {
+			printf("Erro ao realocar o vetor\n");
+			fclose(file);
+			return;
+		}
+		
+		while(fscanf(file, "%d | %d | %d | %d | %d | %d | %d ",&consultas->itens[i].id, consultas->itens[i].idMedico, &consultas->itens[i].idPaciente, &n1,&n2,&n3, &consultas->itens[i].status) ==7) {
+			
+			desconverter_horas(n1,&consultas->itens[i].inicio);
+			desconverter_horas(n2,&consultas->itens[i].fim);
+			descon_data(&consultas->itens[i].data, n3);
+			i++;
+		}
+		
+		consultas->qtd = i;
+		fclose(file);
+		return;
+	}
+}
+
+int realocar_consultas(VetConsultas *consultas) {
+	if(consultas->qtd == consultas->cap) {
+		Consulta *consultas1;
+		consultas1 = (Consulta*) realloc(consultas->itens, (consultas->cap+10) * sizeof(Consulta));
+		if(consultas1 != NULL) {
+			consultas->itens = consultas1;
+			consultas->cap += 10;
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+	return 1;
+}
