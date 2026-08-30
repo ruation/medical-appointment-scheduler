@@ -624,6 +624,9 @@ void listar_medicos(VetMedicos *medicos) {
 void add_consulta(VetConsultas *consultas, VetPacientes *pacientes, VetMedicos *medicos){
     int status = 0, id = 0; //teste
     int id_paciente, id_medico;
+    char choice;
+    
+    
     do{id_paciente = search_paciente(pacientes);}while(id_paciente==-1);
     do{id_medico = pesquisar_medicos(medicos);}while(id_medico==-1);
     Data data; Horario inicio, fim;
@@ -633,6 +636,11 @@ void add_consulta(VetConsultas *consultas, VetPacientes *pacientes, VetMedicos *
     printf("Horario de fim. ");receber_hora(&fim);
     veri_horario(&inicio, &fim, 2);
     
+    printf("agendar consulta? (y/n)");
+    scanf(" %c", &choice);
+    
+    if(choice == 'n') return;
+    
     FILE *file;
     
     file = fopen("consultas.txt", "a");
@@ -641,6 +649,46 @@ void add_consulta(VetConsultas *consultas, VetPacientes *pacientes, VetMedicos *
     
     fclose(file);
     
+    //feeding the vector:
+    
+    consultas->itens[consultas->qtd].id = id;
+    consultas->itens[consultas->qtd].idPaciente = pacientes->itens[id_paciente].id;
+    consultas->itens[consultas->qtd].idMedico = medicos->itens[id_medico].id;
+    consultas->itens[consultas->qtd].data.dia = data.dia;
+    consultas->itens[consultas->qtd].data.mes = data.mes;
+    consultas->itens[consultas->qtd].data.ano = data.ano;
+    consultas->itens[consultas->qtd].inicio.horas = inicio.horas;
+    consultas->itens[consultas->qtd].inicio.minutos = inicio.minutos;
+    consultas->itens[consultas->qtd].fim.horas = fim.horas;
+    consultas->itens[consultas->qtd].fim.minutos = fim.minutos;
+    consultas->itens[consultas->qtd].status = 0;
+    
+    consultas->qtd++;
+    printf("Consulta agendada.\n");
+    
+}
+
+const char* ler_status(int n) {
+	//Recebe um numero do status e devolve a string correta
+	switch(n) {
+	case 0:
+		return "CONS_AGENDADA";
+	case 1:
+		return "CONS_CONCLUIDA";
+	case 2:
+		return "CONS_CANCELADA";
+	case 3:
+		return "CONS_FALTA";
+	default:
+		return "Status invalido";
+	}
+
+}
+
+void list_consultas(VetConsultas *consultas){
+    for(int i = 0; i<consultas->qtd; i++){
+        printf("id: %d id_medico: %d id_paciente: %d data: %d/%d/%d horario: %dh%d as %dh%d status: %s\n", consultas->itens[i].id, consultas->itens[i].idMedico, consultas->itens[i].idPaciente, consultas->itens[i].data.dia, consultas->itens[i].data.mes, consultas->itens[i].data.ano, consultas->itens[i].inicio.horas, consultas->itens[i].inicio.minutos, consultas->itens[i].fim.horas, consultas->itens[i].fim.minutos, ler_status(consultas->itens[i].status));
+    }
 }
 
 int con_data(Data data){
@@ -716,9 +764,9 @@ void read_consultas(VetConsultas *consultas){
 		
 		while(fscanf(file, "%d | %d | %d | %d | %d | %d | %d ",&consultas->itens[i].id, consultas->itens[i].idMedico, &consultas->itens[i].idPaciente, &n1,&n2,&n3, &consultas->itens[i].status) ==7) {
 			
-			desconverter_horas(n1,&consultas->itens[i].inicio);
-			desconverter_horas(n2,&consultas->itens[i].fim);
-			descon_data(&consultas->itens[i].data, n3);
+			desconverter_horas(n2,&consultas->itens[i].inicio);
+			desconverter_horas(n3,&consultas->itens[i].fim);
+			descon_data(&consultas->itens[i].data, n1);
 			i++;
 		}
 		

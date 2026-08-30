@@ -78,6 +78,7 @@ int main()
 				    case 2:
 				        break;
 				    case 3:
+				        list_consultas(&consultas);
 				        break;
 				    default:
 				        break;
