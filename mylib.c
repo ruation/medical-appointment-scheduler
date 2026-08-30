@@ -37,11 +37,13 @@ void add_paciente(VetPacientes *pacientes){
 
 
 	printf("Adicionar o paciente %s, contato: %s com o id: %d? (y/n)\n", nome, contato, maior+1);
-	scanf(" %c", &choice);
+    while(1){
+        scanf(" %c", &choice);
+    
+    if(choice == 'n') return;
+    if(choice=='y')break;
+    }
 
-	if(choice == 'n') {
-		return;
-	}
 	printf("Adicionando...\n\n");
 
 
@@ -72,7 +74,7 @@ int search_paciente(VetPacientes *pacientes) {
 	int id, i;
 	if(pacientes->qtd == 0) {
 		printf("Não existe pacientes cadastrados.\n");
-		return -1;
+		return -2;
 	}
 	printf("Digite o id do paciente: ");
 	scanf("%d", &id);
@@ -178,7 +180,7 @@ void update_pacientes(VetPacientes *pacientes){
     
     if(i == -1)return;
     do{
-        printf("Deseja alterar aos dados desse medico?(y/n)\n");
+        printf("Deseja alterar aos dados desse paciente?(y/n)\n");
         scanf(" %c", &choise);
         if(choise == 'n')return;
     }while(choise != 'y');
@@ -276,49 +278,56 @@ void receber_hora(Horario *horario) {
 	}
 	horario->minutos = minutos;
 	horario->horas = hora;
-	printf("Horario escolhido: %d:%d\n",horario->horas,horario->minutos);
+	printf("Horario escolhido: %d:%d",horario->horas,horario->minutos);
 }
 
 //Trata ainda mais os dados de inicio e fim de uma consulta ou turno
 //Para assim conseguir padronizar um horario correto
-void veri_horario(Horario *inicio, Horario *fim, int n) {
+void veri_horario(Horario *inicio, Horario *fim, int n, int turno) {
 	//n é a variavel que é inserido direto no código, caso 1 trata para medicos e caso 2 para consultas. Default é por segurança que o código não quebre
-	int con_inicio, con_fim;
-	//Converte facilitar o trabalho
 	while(1) {
-	    con_inicio = (inicio->horas * 100) + inicio->minutos;
-		con_fim  = (fim->horas * 100) + fim->minutos;
-		
-		if(con_inicio>=con_fim) {
-			printf("Horario invalido, o horario de inicio é igual ao do fim. Ou o inicio é depois do fim\nCadastre novos horarios\n");
-			receber_hora(inicio);
-			receber_hora(fim);
-		} else {
 			switch(n) {
 			case 1:
-				if(con_fim - con_inicio != 400) {
-					printf("Cada turno do medico deve durar exatamente 4 horas\nCadastre um turno válido\n");
-					receber_hora(inicio);
-					receber_hora(fim);
-				} else {
-					return;
-				}
-				break;
+			    switch(turno){
+			        case 1:
+			            while(inicio->horas > 9 || (inicio->horas == 9 && inicio->minutos > 0) || inicio->horas < 7){
+			                printf(" fim: %d:%d\n", inicio->horas+3, inicio->minutos);
+			                printf("O expediente da manhã precisa ser entre 7h e 12h. ");
+			                receber_hora(inicio);
+			            }
+        		       
+        		       	fim->horas = inicio->horas + 3; //ajusta o fim do expediente somando 3 horas do inicio.
+        			    fim->minutos = inicio->minutos;
+        			    
+        			    printf(" fim: %d:%d\n", fim->horas, fim->minutos);
+        			    return;
+		            case 2:
+		                while(inicio->horas <13 || inicio->horas > 17 || (inicio->horas == 17 && inicio->minutos > 0)){
+		                    printf(" fim: %d:%d\n", inicio->horas+3, inicio->minutos);
+		                    printf("O expediente da tarde precisa ser entre 13h e 20h. ");
+		                    receber_hora(inicio);
+		                }
+        		       	fim->horas = inicio->horas + 3; //ajusta o fim do expediente somando 3 horas do inicio.
+        			    fim->minutos = inicio->minutos;
+        			    printf(" fim: %d:%d\n", fim->horas, fim->minutos);
+		                return;
+			    }
+
 			case 2:
-				if(con_fim - con_inicio != 100) {
-					printf("Cada consulta deve durar exatamente 1 horas\nCadastre um horario de consulta válido\n");
-					receber_hora(inicio);
-					receber_hora(fim);
-				} else {
-					return;
-				}
-				break;
+			    while((inicio->horas == 19 && inicio->minutos > 0) || inicio->horas > 19 || inicio->horas<7 || (inicio->horas == 11 && inicio->minutos > 0) || inicio->horas == 12){
+			         printf(" fim: %d:%d\n", inicio->horas+1, inicio->minutos);
+			         printf("A consulta precisa ser entre 7h e 12h ou 13h e 20h ");
+			         receber_hora(inicio);
+			    }
+			    fim->horas = inicio->horas + 1; //ajusta o fim da consulta adicionando 1 hora do inicio
+			    fim->minutos = inicio->minutos;
+			    printf(" fim: %d:%d\n", fim->horas, fim->minutos);
+                return;
 			default:
 				printf("Erro\n");
 				return;
 			}
 		}
-	}
 }
 //Tratando os dados para alocar mais facil as horas
 //Para otimizar o espaço, isso serve para converter horario que seria duas variaveis em uma só
@@ -517,18 +526,15 @@ void add_medico(VetMedicos *medicos) {
 
 	medico.especialidade = choise1 - 1;
 
-	printf("Adendo: cada turno do medico deve ser de exatamente 4 horas de duração\n");
+	printf("Adendo: cada turno do medico vai ser calculado com 3 horas de duração\n");
 
-	printf("    Preencha o horário da consulta do inicio da manhã\n");
+	printf("    Preencha o horário do expediente do inicio da manhã\n");
 	receber_hora(&medico.inicioManha);
-	printf("    Preencha o horário de consulta do fim da manhã\n");
-	receber_hora(&medico.fimManha);
-	veri_horario(&medico.inicioManha,&medico.fimManha,1);
-	printf("    Preencha o horário de consulta do inicio da tarde\n");
+	veri_horario(&medico.inicioManha,&medico.fimManha,1, 1);
+	
+	printf("    Preencha o horário do expediente do inicio da tarde\n");
 	receber_hora(&medico.inicioTarde);
-	printf("    Preencha o horário de consulta do fim da tarde\n");
-	receber_hora(&medico.fimTarde);
-	veri_horario(&medico.inicioTarde,&medico.fimTarde,1);
+	veri_horario(&medico.inicioTarde,&medico.fimTarde,1, 2);
 
 	printf("        Deseja adicionar\n");
 	mostrar_medico(medico);
@@ -561,6 +567,8 @@ void add_medico(VetMedicos *medicos) {
 int pesquisar_medicos(VetMedicos *medicos) {
 	int numero, i;
 	Medico medico1;
+	
+	if(medicos->qtd < 1){printf("Não existe medicos cadastrados.\n");return -2;}
 	
 	printf("Digite o id do medico desejado\n");
 	scanf("%d", &numero);
@@ -614,18 +622,14 @@ void update_medicos(VetMedicos *medicos){
 
 	medico.especialidade = choise1 - 1;
 
-	printf("Adendo: cada turno do medico deve ser de exatamente 4 horas de duração\n");
+	printf("Adendo: cada turno do medico deve ser de exatamente 3 horas de duração\n");
 
 	printf("    Preencha o horário da consulta do inicio da manhã\n");
 	receber_hora(&medico.inicioManha);
-	printf("    Preencha o horário de consulta do fim da manhã\n");
-	receber_hora(&medico.fimManha);
-	veri_horario(&medico.inicioManha,&medico.fimManha,1);
+	veri_horario(&medico.inicioManha,&medico.fimManha,1, 1);
 	printf("    Preencha o horário de consulta do inicio da tarde\n");
 	receber_hora(&medico.inicioTarde);
-	printf("    Preencha o horário de consulta do fim da tarde\n");
-	receber_hora(&medico.fimTarde);
-	veri_horario(&medico.inicioTarde,&medico.fimTarde,1);
+	veri_horario(&medico.inicioTarde,&medico.fimTarde,1, 2);
 
 	printf("Medico atualizado\n");
 	mostrar_medico(medico);
@@ -690,7 +694,7 @@ void listar_medicos(VetMedicos *medicos) {
 	printf("Quantidade total de medicos cadastrados no sistema: %d\n", medicos->qtd);
 
     while(1) {
-			printf("1 - listar todos\n 2 - especialidade especifica\n");
+			printf("1 - listar todos\n2 - especialidade especifica\n");
 			scanf("%d",&choise);
 			if(choise==1 || 2==choise) {
 				break;
@@ -702,6 +706,7 @@ void listar_medicos(VetMedicos *medicos) {
 	if(choise == 1){
 	    for(i = 0; i<medicos->qtd; i++) {
 			mostrar_medico(medicos->itens[i]);
+			printf("\n");
 		}
 	}else{
 	    while(1) {
@@ -722,6 +727,7 @@ void listar_medicos(VetMedicos *medicos) {
     		for(i = 0; i<medicos->qtd; i++) {
     			if(choise == medicos->itens[i].especialidade) {
     				mostrar_medico(medicos->itens[i]);
+    				printf("\n");
     				flag++;
     			}
     		}
@@ -744,36 +750,45 @@ void listar_medicos(VetMedicos *medicos) {
 }
 
 void add_consulta(VetConsultas *consultas, VetPacientes *pacientes, VetMedicos *medicos){
-    int status = 0, id = 0; //teste
+    int status = 0; //teste
     int id_paciente, id_medico;
     char choice;
     
     
-    do{id_paciente = search_paciente(pacientes);}while(id_paciente==-1);
-    do{id_medico = pesquisar_medicos(medicos);}while(id_medico==-1);
+    do{id_paciente = search_paciente(pacientes);if(id_paciente==-2)return;}while(id_paciente==-1);
+    do{id_medico = pesquisar_medicos(medicos);if(id_medico==-2)return;}while(id_medico==-1);
     Data data; Horario inicio, fim;
     add_data(&data);
     printf("Horario de inicio. ");
     receber_hora(&inicio); 
-    printf("Horario de fim. ");receber_hora(&fim);
-    veri_horario(&inicio, &fim, 2);
+    veri_horario(&inicio, &fim, 2, 0);
     
     printf("agendar consulta? (y/n)");
-    scanf(" %c", &choice);
+    while(1){
+        scanf(" %c", &choice);
     
     if(choice == 'n') return;
+    if(choice=='y')break;
+    }
+    
+    int maior = 0;
+    if(consultas->qtd > 0){
+        for(int i = 0; i < consultas->qtd; i++){
+            if(consultas->itens[i].id > maior) maior = consultas->itens[i].id;
+        }
+    }
     
     FILE *file;
     
     file = fopen("consultas.txt", "a");
     
-    fprintf(file, "%d | %d | %d | %d | %d | %d | %d\n", id, pacientes->itens[id_paciente].id, medicos->itens[id_medico].id, con_data(data), con_horas(inicio), con_horas(fim), status);
+    fprintf(file, "%d | %d | %d | %d | %d | %d | %d\n", maior+1, pacientes->itens[id_paciente].id, medicos->itens[id_medico].id, con_data(data), con_horas(inicio), con_horas(fim), status);
     
     fclose(file);
     
     //feeding the vector:
     
-    consultas->itens[consultas->qtd].id = id;
+    consultas->itens[consultas->qtd].id = maior+1;
     consultas->itens[consultas->qtd].idPaciente = pacientes->itens[id_paciente].id;
     consultas->itens[consultas->qtd].idMedico = medicos->itens[id_medico].id;
     consultas->itens[consultas->qtd].data.dia = data.dia;
@@ -809,6 +824,7 @@ const char* ler_status(int n) {
 void printar_consultas(Consulta *consultas){
     printf("id: %d id_medico: %d id_paciente: %d data: %d/%d/%d horario: %dh%d as %dh%d status: %s\n", consultas->id, consultas->idMedico, consultas->idPaciente, consultas->data.dia, consultas->data.mes, consultas->data.ano, consultas->inicio.horas, consultas->inicio.minutos, consultas->fim.horas, consultas->fim.minutos, ler_status(consultas->status));
 }
+
 void list_consultas(VetConsultas *consultas){
     int choice = 0;
     printf("1 - Todas\n2 - Agendadas\n3 - Concluidas\n4 - Canceladas\n5 - Faltas\n");
@@ -924,7 +940,7 @@ int realocar_consultas(VetConsultas *consultas) {
 
 int search_consultas(VetConsultas *consultas){
     int numero, i;
-	printf("Digite o id do consulta desejado\n");
+	printf("Digite o id da consulta desejado\n");
 	scanf("%d", &numero);
     
     printf("Quantidade de consultas: %d\n", consultas->qtd);

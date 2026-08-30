@@ -72,7 +72,7 @@ void receber_hora(Horario *horario);
 int con_horas(Horario horario);
 void desconverter_horas(int n, Horario *horario);
 int contar_linhas(FILE *arquivo);
-void veri_horario(Horario *inicio, Horario *fim, int n);
+void veri_horario(Horario *inicio, Horario *fim, int n, int turno);
 int verify_name(const char *str);
 int verify_email(const char *str);
 
