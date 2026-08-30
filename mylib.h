@@ -104,3 +104,5 @@ void list_consultas(VetConsultas *consultas);
 void read_consultas(VetConsultas *consultas);
 int realocar_consultas(VetConsultas *consultas);
 const char* ler_status(int n);
+void printar_consultas(Consulta *consultas);
+int search_consultas(VetConsultas *consultas);

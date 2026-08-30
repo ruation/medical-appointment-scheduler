@@ -684,7 +684,9 @@ const char* ler_status(int n) {
 	}
 
 }
-
+void printar_consultas(Consulta *consultas){
+    printf("id: %d id_medico: %d id_paciente: %d data: %d/%d/%d horario: %dh%d as %dh%d status: %s\n", consultas->id, consultas->idMedico, consultas->idPaciente, consultas->data.dia, consultas->data.mes, consultas->data.ano, consultas->inicio.horas, consultas->inicio.minutos, consultas->fim.horas, consultas->fim.minutos, ler_status(consultas->status));
+}
 void list_consultas(VetConsultas *consultas){
     int choice = 0;
     printf("1 - Todas\n2 - Agendadas\n3 - Concluidas\n4 - Canceladas\n5 - Faltas\n");
@@ -770,11 +772,10 @@ void read_consultas(VetConsultas *consultas){
 			return;
 		}
 		
-		while(fscanf(file, "%d | %d | %d | %d | %d | %d | %d ",&consultas->itens[i].id, &consultas->itens[i].idMedico, &consultas->itens[i].idPaciente, &n1,&n2,&n3, &consultas->itens[i].status) ==7) {
-			
+		while(fscanf(file, "%d | %d | %d | %d | %d | %d | %d",&consultas->itens[i].id, &consultas->itens[i].idMedico, &consultas->itens[i].idPaciente, &n1,&n2,&n3, &consultas->itens[i].status) ==7) {
+			descon_data(&consultas->itens[i].data, n1);
 			desconverter_horas(n2,&consultas->itens[i].inicio);
 			desconverter_horas(n3,&consultas->itens[i].fim);
-			descon_data(&consultas->itens[i].data, n1);
 			i++;
 		}
 		
@@ -797,4 +798,26 @@ int realocar_consultas(VetConsultas *consultas) {
 		}
 	}
 	return 1;
+}
+
+int search_consultas(VetConsultas *consultas){
+    int numero, i;
+	printf("Digite o id do consulta desejado\n");
+	scanf("%d", &numero);
+    
+    printf("Quantidade de consultas: %d\n", consultas->qtd);
+	for(i = 0; i < consultas->qtd && numero!=consultas->itens[i].id; i++);
+
+	printf("ID de consultas: %d\n", consultas->itens[i].id);
+
+	if( i < consultas->itens[i].id && numero!=0) {
+		if(numero == consultas->itens[i].id) {
+			printf("Consulta encontrado\n");
+			printar_consultas(&consultas->itens[i]);
+			return i;
+		}
+	} else {
+		printf("Consulta não encontrado no sistema\n");
+		return -1;
+	}
 }

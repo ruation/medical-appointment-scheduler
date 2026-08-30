@@ -69,7 +69,7 @@ int main()
 			break;
 		case 3:
 			do {
-				printf("---- menu consultas ----\n1 - adicionar\n2 - editar consulta\n3 - listar consultas\n9 - voltar\n");
+				printf("---- menu consultas ----\n1 - adicionar\n2 - editar consulta\n3 - listar consultas\n4 - pesquisar consulta\n9 - voltar\n");
 				scanf("%d", &op1);
 				switch(op1){
 				    case 1:
@@ -80,6 +80,8 @@ int main()
 				    case 3:
 				        list_consultas(&consultas);
 				        break;
+				    case 4:
+				        search_consultas(&consultas);
 				    default:
 				        break;
 				}
