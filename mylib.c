@@ -686,9 +686,17 @@ const char* ler_status(int n) {
 }
 
 void list_consultas(VetConsultas *consultas){
-    for(int i = 0; i<consultas->qtd; i++){
-        printf("id: %d id_medico: %d id_paciente: %d data: %d/%d/%d horario: %dh%d as %dh%d status: %s\n", consultas->itens[i].id, consultas->itens[i].idMedico, consultas->itens[i].idPaciente, consultas->itens[i].data.dia, consultas->itens[i].data.mes, consultas->itens[i].data.ano, consultas->itens[i].inicio.horas, consultas->itens[i].inicio.minutos, consultas->itens[i].fim.horas, consultas->itens[i].fim.minutos, ler_status(consultas->itens[i].status));
-    }
+    int choice = 0;
+    printf("1 - Todas\n2 - Agendadas\n3 - Concluidas\n4 - Canceladas\n5 - Faltas\n");
+    do{scanf("%d", &choice);}while(choice > 5 || choice < 1);
+    if(choice == 1){
+        for(int i = 0; i<consultas->qtd; i++){
+            printf("id: %d id_medico: %d id_paciente: %d data: %d/%d/%d horario: %dh%d as %dh%d status: %s\n", consultas->itens[i].id, consultas->itens[i].idMedico, consultas->itens[i].idPaciente, consultas->itens[i].data.dia, consultas->itens[i].data.mes, consultas->itens[i].data.ano, consultas->itens[i].inicio.horas, consultas->itens[i].inicio.minutos, consultas->itens[i].fim.horas, consultas->itens[i].fim.minutos, ler_status(consultas->itens[i].status));
+        }
+    }else{
+        for(int i = 0; i<consultas->qtd; i++){
+            if(consultas->itens[i].status == (choice-2))printf("id: %d id_medico: %d id_paciente: %d data: %d/%d/%d horario: %dh%d as %dh%d status: %s\n", consultas->itens[i].id, consultas->itens[i].idMedico, consultas->itens[i].idPaciente, consultas->itens[i].data.dia, consultas->itens[i].data.mes, consultas->itens[i].data.ano, consultas->itens[i].inicio.horas, consultas->itens[i].inicio.minutos, consultas->itens[i].fim.horas, consultas->itens[i].fim.minutos, ler_status(consultas->itens[i].status));
+    }}
 }
 
 int con_data(Data data){
@@ -762,7 +770,7 @@ void read_consultas(VetConsultas *consultas){
 			return;
 		}
 		
-		while(fscanf(file, "%d | %d | %d | %d | %d | %d | %d ",&consultas->itens[i].id, consultas->itens[i].idMedico, &consultas->itens[i].idPaciente, &n1,&n2,&n3, &consultas->itens[i].status) ==7) {
+		while(fscanf(file, "%d | %d | %d | %d | %d | %d | %d ",&consultas->itens[i].id, &consultas->itens[i].idMedico, &consultas->itens[i].idPaciente, &n1,&n2,&n3, &consultas->itens[i].status) ==7) {
 			
 			desconverter_horas(n2,&consultas->itens[i].inicio);
 			desconverter_horas(n3,&consultas->itens[i].fim);
