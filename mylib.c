@@ -15,9 +15,9 @@ void add_paciente(VetPacientes *pacientes){
     }
     
     do{printf("Digite o nome do paciente: ");
-    getchar();
-    fgets(nome,64, stdin);
-    nome[strcspn(nome, "\n")] = '\0';
+        getchar();
+        fgets(nome,64, stdin);
+        nome[strcspn(nome, "\n")] = '\0';
     }while(verify_name(nome)==0);
     
     do{printf("Digite o e-mail do paciente: ");
@@ -168,6 +168,54 @@ void remover_paciente(VetPacientes *pacientes){
     
 }
 
+void update_pacientes(VetPacientes *pacientes){
+    
+    char choise;
+    int i, choise1;
+    Paciente paciente;
+    
+    i = search_paciente(pacientes);
+    
+    if(i == -1)return;
+    do{
+        printf("Deseja alterar aos dados desse medico?(y/n)\n");
+        scanf(" %c", &choise);
+        if(choise == 'n')return;
+    }while(choise != 'y');
+    
+    do{printf("Digite o nome do paciente: ");
+        getchar();
+        fgets(paciente.nome,64, stdin);
+        paciente.nome[strcspn(paciente.nome, "\n")] = '\0';
+    }while(verify_name(paciente.nome)==0);
+    
+    do{printf("Digite o e-mail do paciente: ");
+    fgets(paciente.contato,64, stdin);
+    paciente.contato[strcspn(paciente.contato, "\n")] = '\0';
+    }while(verify_email(paciente.contato)==0);
+    
+    paciente.id = pacientes->itens[i].id;
+    
+    printf("Paciente atualizado\nNome: %s\nContato: %s\nId: %d\n", paciente.nome, paciente.contato,paciente.id);
+
+	FILE *file;
+    
+	file = fopen("pacientes.txt", "w");
+	if(file==NULL){
+		printf("Erro de memoria\n");
+		fclose(file);
+		return;
+	}
+	
+	pacientes->itens[i] = paciente;
+	
+	printf("Atualizando...\n\n");
+	for(i = 0; i < pacientes->qtd;i++){
+	    	fprintf(file, "%s | %s | %d \n",pacientes->itens[i].nome, pacientes->itens[i].contato, pacientes->itens[i].id );
+
+	}
+	fclose(file);
+}
 void list_pacientes(VetPacientes *pacientes){
     for(int i = 0; i < pacientes->qtd; i++){
         printf("id: %d nome: %s contato: %s\n", pacientes->itens[i].id, pacientes->itens[i].nome, pacientes->itens[i].contato);
@@ -448,11 +496,13 @@ void add_medico(VetMedicos *medicos) {
 		}
 	}
 	medico.id = maior+1;
-
-	printf("Digite o nome do medico: ");
-	getchar();
-	fgets(medico.nome,64, stdin);
-	medico.nome[strcspn(medico.nome, "\n")] = '\0';
+    do{
+        printf("Digite o nome do medico: ");
+    	getchar();
+    	fgets(medico.nome,64, stdin);
+    	medico.nome[strcspn(medico.nome, "\n")] = '\0';
+    }while(verify_name(medico.nome)!= 1);
+	
 	//Recebe a especialidade do medico e converte para ficar da maneira correta
 	while(1) {
 		printf("Escolha uma das seguintes especialidade do médico\nClinico: 1\nPediatra: 2\nDermatologista: 3\nCardiologista: 4\nOutra: 5\n");
@@ -510,6 +560,8 @@ void add_medico(VetMedicos *medicos) {
 
 int pesquisar_medicos(VetMedicos *medicos) {
 	int numero, i;
+	Medico medico1;
+	
 	printf("Digite o id do medico desejado\n");
 	scanf("%d", &numero);
 	//Percorre todo vetor de medicos até encontrar o medico com id escolhido pelo usuario.
@@ -528,6 +580,76 @@ int pesquisar_medicos(VetMedicos *medicos) {
 	}
 }
 
+void update_medicos(VetMedicos *medicos){
+    char choise;
+    int i, choise1;
+    Medico medico;
+    
+    i = pesquisar_medicos(medicos);
+    
+    if(i == -1)return;
+    do{
+        printf("Deseja alterar aos dados desse medico?(y/n)\n");
+        scanf(" %c", &choise);
+        if(choise == 'n')return;
+    }while(choise != 'y');
+    
+    do{
+        printf("Digite o nome do medico: ");
+    	getchar();
+    	fgets(medico.nome,64, stdin);
+    	medico.nome[strcspn(medico.nome, "\n")] = '\0';
+    }while(verify_name(medico.nome)!= 1);
+	
+	while(1) {
+		printf("Escolha uma das seguintes especialidade do médico\nClinico: 1\nPediatra: 2\nDermatologista: 3\nCardiologista: 4\nOutra: 5\n");
+		scanf("%d",&choise1);
+		if(choise1>=1 && 5>=choise1) {
+			break;
+		}
+		else {
+			printf("Digite uma opção válida\n");
+		}
+	}
+
+	medico.especialidade = choise1 - 1;
+
+	printf("Adendo: cada turno do medico deve ser de exatamente 4 horas de duração\n");
+
+	printf("    Preencha o horário da consulta do inicio da manhã\n");
+	receber_hora(&medico.inicioManha);
+	printf("    Preencha o horário de consulta do fim da manhã\n");
+	receber_hora(&medico.fimManha);
+	veri_horario(&medico.inicioManha,&medico.fimManha,1);
+	printf("    Preencha o horário de consulta do inicio da tarde\n");
+	receber_hora(&medico.inicioTarde);
+	printf("    Preencha o horário de consulta do fim da tarde\n");
+	receber_hora(&medico.fimTarde);
+	veri_horario(&medico.inicioTarde,&medico.fimTarde,1);
+
+	printf("Medico atualizado\n");
+	mostrar_medico(medico);
+
+	FILE *file;
+    
+	file = fopen("medicos.txt", "w");
+	if(file==NULL) {
+		printf("Erro de memoria\n");
+		fclose(file);
+		return;
+	}
+	
+	medico.id = medicos->itens[i].id;
+	medicos->itens[i] = medico;
+	
+	printf("Atualizando...\n\n");
+	for(i = 0; i < medicos->qtd;i++){
+	    	fprintf(file, "%d|%s|%d|%d|%d|%d|%d\n",medicos->itens[i].id, medicos->itens[i].nome, medicos->itens[i].especialidade,con_horas(medicos->itens[i].inicioManha),con_horas(medicos->itens[i].fimManha),con_horas(medicos->itens[i].inicioTarde),con_horas(medicos->itens[i].fimTarde));
+
+	}
+	fclose(file);
+    
+}
 void remover_medico(VetMedicos *medicos) {
 	int i, id;
 	char choise;
