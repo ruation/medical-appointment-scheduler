@@ -16,9 +16,7 @@ int main()
 	
 	//Inicializa o VetConsultas com valores iniciais
 	VetConsultas consultas;
-	consultas.qtd = 0; consultas.cap = 10;
-	consultas.itens = (Consulta *) malloc(sizeof(Consulta ) * consultas.cap);
-
+	read_consultas(&consultas);
 
 
 	do {
