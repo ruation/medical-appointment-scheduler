@@ -83,7 +83,7 @@ void read_pacientes(VetPacientes *pacientes);
 int realocar_pacientes(VetPacientes *pacientes);
 void remover_paciente(VetPacientes *pacientes);
 void list_pacientes(VetPacientes *pacientes);
-
+void update_pacientes(VetPacientes *pacientes);
 //Prototipos de funções de medicos
 
 void read_medicos(VetMedicos *medicos);
@@ -93,6 +93,7 @@ void mostrar_medico(Medico medico);
 int pesquisar_medicos(VetMedicos *medicos);
 void remover_medico(VetMedicos *medicos);
 void listar_medicos(VetMedicos *medicos);
+void update_medicos(VetMedicos *medicos);
 
 //Prototipos de funções de consultas 
 
@@ -104,3 +105,5 @@ void list_consultas(VetConsultas *consultas);
 void read_consultas(VetConsultas *consultas);
 int realocar_consultas(VetConsultas *consultas);
 const char* ler_status(int n);
+void printar_consultas(Consulta *consultas);
+int search_consultas(VetConsultas *consultas);
