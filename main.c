@@ -25,7 +25,7 @@ int main()
 		switch(op) {
 		case 1:
 			do {
-				printf("---- menu pacientes ----\n1 - adicionar\n2 - procurar paciente\n3 - remover paciente\n4 - listar pacientes\n5 - atualizar paciente\n9 - voltar\n");
+				printf("---- menu pacientes ----\n1 - adicionar\n2 - procurar paciente\n3 - remover paciente\n4 - listar pacientes\n5 - atualizar medico\n9 - voltar\n");
 				scanf("%d", &op1);
 				switch(op1) {
 				case 1:
@@ -74,19 +74,23 @@ int main()
 			break;
 		case 3:
 			do {
-				printf("---- menu consultas ----\n1 - adicionar\n2 - editar consulta\n3 - listar consultas\n4 - pesquisar consulta\n9 - voltar\n");
+				printf("---- menu consultas ----\n1 - adicionar\n2 - editar consulta\n3 - listar consultas\n4 - pesquisar consulta\n5 - deletar consulta\n 9 - voltar\n");
 				scanf("%d", &op1);
 				switch(op1){
 				    case 1:
 				        add_consulta(&consultas, &pacientes, &medicos);
 				        break;
 				    case 2:
+				        update_status(&consultas);
 				        break;
 				    case 3:
 				        list_consultas(&consultas);
 				        break;
 				    case 4:
 				        search_consultas(&consultas);
+				        break;
+				    case 5:
+				        del_consulta(&consultas);
 				    default:
 				        break;
 				}
@@ -96,6 +100,7 @@ int main()
 			break;
 		}
 	} while(op!=9);
+	
 	free(pacientes.itens);
 	free(medicos.itens);
 	free(consultas.itens);
