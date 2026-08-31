@@ -12,11 +12,15 @@ void add_consulta(VetConsultas *consultas, VetPacientes *pacientes, VetMedicos *
     
     do{id_paciente = search_paciente(pacientes);if(id_paciente==-2)return;}while(id_paciente==-1);
     do{id_medico = pesquisar_medicos(medicos);if(id_medico==-2)return;}while(id_medico==-1);
+    
     Data data; Horario inicio, fim;
-    add_data(&data);
+    
+    do{add_data(&data);
+    
     printf("Horario de inicio. ");
     receber_hora(&inicio); 
     veri_horario(&inicio, &fim, 2, 0);
+    }while(verify_consulta(medicos, consultas, data, inicio, id_medico) == 0);
     
     printf("agendar consulta? (y/n)");
     while(1){
@@ -58,6 +62,37 @@ void add_consulta(VetConsultas *consultas, VetPacientes *pacientes, VetMedicos *
     consultas->qtd++;
     printf("Consulta agendada.\n");
     
+}
+
+int verify_consulta(VetMedicos *medicos, VetConsultas *consultas, Data data, Horario inicio, int id_medico){
+    int data_con = con_data(data);//convertendo pra ficar mais facil
+    
+    int flag = 1;
+    
+    if(inicio.horas>12){// Separa a condicional para o caso da consulta ser de tarde ou ser de manhã.
+        
+        if( con_horas(medicos->itens[id_medico].inicioTarde) > con_horas(inicio)){ //Verifica se o inicio da consulta é antes do inicioTarde do médico.
+            printf("A consulta não pode ser antes do expediente do médico."); return 0;
+        }else if( con_horas(medicos->itens[id_medico].fimTarde) < (con_horas(inicio) + 100)){ //Verifica se o fim da consulta é depois do fimTarde do médico.
+            printf("A consulta não pode terminar depois do expediente do médico."); return 0;
+        }
+    }else{
+        if( con_horas(medicos->itens[id_medico].inicioManha) > con_horas(inicio)){
+            printf("A consulta não pode ser antes do expediente do médico."); return 0;
+        }else if( con_horas(medicos->itens[id_medico].fimTarde) < (con_horas(inicio) + 100)){
+            printf("A consulta não pode terminar depois do expediente do médico."); return 0;
+        }
+        
+    }
+    
+    for(int i = 0; i < consultas->qtd; i++){//looping para ver todas as consultas cadastradas.
+        if(con_data(consultas->itens[i].data) == data_con && consultas->itens[i].idMedico == medicos->itens[id_medico].id){ //Verifica se existe uma consulta cadastrada com a mesma data e o mesmo médico.
+            if(abs(con_horas(consultas->itens[i].inicio) - con_horas(inicio)) < 100)flag = 0;
+        }
+    }
+    
+    if(flag == 0){printf("O medico ja tem uma consulta nesse horario, escolha outro.\n"); return 0;}
+    return 1;
 }
 
 const char* ler_status(int n) {
