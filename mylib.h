@@ -112,5 +112,6 @@ const char* ler_status(int n);
 void printar_consultas(Consulta *consultas);
 int search_consultas(VetConsultas *consultas);
 void del_consulta(VetConsultas *consultas);
-void update_status(VetConsultas *consultas);
+void update_status(VetConsultas *consultas);;
+int verify_consulta(VetMedicos *medicos, VetConsultas *consultas, Data data, Horario inicio, int id_medico);
 #endif
