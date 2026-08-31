@@ -165,6 +165,11 @@ int realocar_pacientes(VetPacientes *pacientes) {
 }
 
 void remover_paciente(VetPacientes *pacientes){
+    
+    if(pacientes->qtd == 0){
+	    printf("Sem pacientes cadastradas no sistema\n");
+	    return;
+	}
     int id = search_paciente(pacientes);
     char choice;
     if(id == -1){return;}
@@ -191,6 +196,10 @@ void remover_paciente(VetPacientes *pacientes){
 
 void update_pacientes(VetPacientes *pacientes){
     
+    if(pacientes->qtd == 0){
+	    printf("Sem pacientes cadastradas no sistema\n");
+	    return;
+	}
     char choise;
     int i, choise1;
     Paciente paciente;

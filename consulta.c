@@ -5,14 +5,20 @@
 #include "mylib.h"
 
 void add_consulta(VetConsultas *consultas, VetPacientes *pacientes, VetMedicos *medicos){
-    int status = 0; //teste
+    int choise1, status = 0; //teste
     int id_paciente, id_medico;
     char choice;
     
-    
+    if(realocar_consultas(consultas) == 0){
+        printf("Sem memoria para adicionar novas consultas\n");
+        return;
+    }
     do{id_paciente = search_paciente(pacientes);if(id_paciente==-2)return;}while(id_paciente==-1);
     do{id_medico = pesquisar_medicos(medicos);if(id_medico==-2)return;}while(id_medico==-1);
     
+    for(int i = 0; i<consultas->qtd; i++){
+            if(consultas->itens[i].idMedico == medicos->itens[id_medico].id && consultas->itens[i].status == 0)printf("id: %d id_medico: %d id_paciente: %d data: %d/%d/%d horario: %dh%d as %dh%d status: %s\n", consultas->itens[i].id, consultas->itens[i].idMedico, consultas->itens[i].idPaciente, consultas->itens[i].data.dia, consultas->itens[i].data.mes, consultas->itens[i].data.ano, consultas->itens[i].inicio.horas, consultas->itens[i].inicio.minutos, consultas->itens[i].fim.horas, consultas->itens[i].fim.minutos, ler_status(consultas->itens[i].status));
+        }
     Data data; Horario inicio, fim;
     
     do{add_data(&data);
@@ -72,22 +78,25 @@ int verify_consulta(VetMedicos *medicos, VetConsultas *consultas, Data data, Hor
     if(inicio.horas>12){// Separa a condicional para o caso da consulta ser de tarde ou ser de manhã.
         
         if( con_horas(medicos->itens[id_medico].inicioTarde) > con_horas(inicio)){ //Verifica se o inicio da consulta é antes do inicioTarde do médico.
-            printf("A consulta não pode ser antes do expediente do médico."); return 0;
-        }else if( con_horas(medicos->itens[id_medico].fimTarde) < (con_horas(inicio) + 100)){ //Verifica se o fim da consulta é depois do fimTarde do médico.
-            printf("A consulta não pode terminar depois do expediente do médico."); return 0;
+            printf("A consulta não pode ser antes do expediente do médico.\n"); return 0;
+        }else{
+            if( con_horas(medicos->itens[id_medico].fimTarde) < (con_horas(inicio) + 100)){ //Verifica se o fim da consulta é depois do fimTarde do médico.
+            printf("A consulta não pode terminar depois do expediente do médico.\n"); return 0;}
         }
     }else{
         if( con_horas(medicos->itens[id_medico].inicioManha) > con_horas(inicio)){
-            printf("A consulta não pode ser antes do expediente do médico."); return 0;
-        }else if( con_horas(medicos->itens[id_medico].fimTarde) < (con_horas(inicio) + 100)){
-            printf("A consulta não pode terminar depois do expediente do médico."); return 0;
+            printf("A consulta não pode ser antes do expediente do médico.\n"); return 0;
+        }else{
+            if( con_horas(medicos->itens[id_medico].fimManha) < (con_horas(inicio) + 100)){
+            printf("A consulta não pode terminar depois do expediente do médico.\n"); 
+            return 0;}
         }
         
     }
     
     for(int i = 0; i < consultas->qtd; i++){//looping para ver todas as consultas cadastradas.
         if(con_data(consultas->itens[i].data) == data_con && consultas->itens[i].idMedico == medicos->itens[id_medico].id){ //Verifica se existe uma consulta cadastrada com a mesma data e o mesmo médico.
-            if(abs(con_horas(consultas->itens[i].inicio) - con_horas(inicio)) < 100)flag = 0;
+            if(abs(con_horas(consultas->itens[i].inicio) - con_horas(inicio)) < 100 && consultas->itens[i].status == 0)flag = 0;
         }
     }
     
@@ -116,11 +125,16 @@ void printar_consultas(Consulta *consultas){
 }
 
 void list_consultas(VetConsultas *consultas){
+    
+    if(consultas->qtd == 0){
+	    printf("Sem consultas cadastradas no sistema\n");
+	    return;
+	}
     int choice = 0;
     printf("1 - Todas\n2 - Agendadas\n3 - Concluidas\n4 - Canceladas\n5 - Faltas\n");
     do{scanf("%d", &choice);}while(choice > 5 || choice < 1);
     if(choice == 1){
-        for(int i = 0; i<consultas->qtd; i++){
+        for(int i = 0; i < consultas->qtd; i++){
             printf("id: %d id_medico: %d id_paciente: %d data: %d/%d/%d horario: %dh%d as %dh%d status: %s\n", consultas->itens[i].id, consultas->itens[i].idMedico, consultas->itens[i].idPaciente, consultas->itens[i].data.dia, consultas->itens[i].data.mes, consultas->itens[i].data.ano, consultas->itens[i].inicio.horas, consultas->itens[i].inicio.minutos, consultas->itens[i].fim.horas, consultas->itens[i].fim.minutos, ler_status(consultas->itens[i].status));
         }
     }else{
@@ -230,6 +244,11 @@ int realocar_consultas(VetConsultas *consultas) {
 
 int search_consultas(VetConsultas *consultas){
     int numero, i;
+	
+	if(consultas->qtd == 0){
+	    printf("Sem consultas cadastradas no sistema\n");
+	    return -1;
+	}
 	printf("Digite o id da consulta desejado\n");
 	scanf("%d", &numero);
     
@@ -250,6 +269,7 @@ int search_consultas(VetConsultas *consultas){
 	}
 }
 void del_consulta(VetConsultas *consultas){
+    
     if(consultas->qtd == 0){
         printf("Nenhuma consulta cadastrada no sistema\n");
         return;
