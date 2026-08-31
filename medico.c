@@ -225,6 +225,11 @@ int pesquisar_medicos(VetMedicos *medicos) {
 }
 
 void update_medicos(VetMedicos *medicos){
+    
+    if(medicos->qtd == 0){
+	    printf("Sem medicos cadastradas no sistema\n");
+	    return;
+	}
     char choise;
     int i, choise1;
     Medico medico;
@@ -286,6 +291,10 @@ void update_medicos(VetMedicos *medicos){
     
 }
 void remover_medico(VetMedicos *medicos) {
+	if(medicos->qtd == 0){
+	    printf("Sem medicos cadastradas no sistema\n");
+	    return;
+	}
 	int i, id;
 	char choise;
 	id = pesquisar_medicos(medicos);
@@ -319,6 +328,11 @@ void remover_medico(VetMedicos *medicos) {
 }
 //Lista medicos filtrando por especialidade e mostra a quantidade de medicos cadastrados
 void listar_medicos(VetMedicos *medicos) {
+	
+	if(medicos->qtd == 0){
+	    printf("Sem medicos cadastradas no sistema\n");
+	    return;
+	}
 	int choise,i, flag = 0;
 	char choise1;
 
