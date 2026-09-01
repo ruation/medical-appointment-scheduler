@@ -47,7 +47,7 @@ void add_consulta(VetConsultas *consultas, VetPacientes *pacientes, VetMedicos *
     
     file = fopen("consultas.txt", "a");
     
-    fprintf(file, "%d | %d | %d | %d | %d | %d | %d\n", maior+1, pacientes->itens[id_paciente].id, medicos->itens[id_medico].id, con_data(data), con_horas(inicio), con_horas(fim), status);
+    fprintf(file, "%d | %d | %d | %d | %d | %d | %d\n", maior+1, medicos->itens[id_medico].id, pacientes->itens[id_paciente].id, con_data(data), con_horas(inicio), con_horas(fim), status);
     
     fclose(file);
     
@@ -304,6 +304,27 @@ void del_consulta(VetConsultas *consultas){
 	fclose(file);
 	printf("Consulta removida\n");
 }
+
+void auto_del_consulta(VetConsultas *consultas, int id){
+
+
+	FILE *file;
+	
+	for(int i = id; i < consultas->qtd-1 ; i++) {
+		consultas->itens[i] = consultas->itens[i + 1];
+	}
+	consultas->qtd--;
+
+	file = fopen("consultas.txt", "w");
+
+	for(int i = 0; i< consultas->qtd; i++) {
+        fprintf(file, "%d | %d | %d | %d | %d | %d | %d\n",consultas->itens[i].id ,consultas->itens[i].idMedico ,consultas->itens[i].idPaciente, con_data(consultas->itens[i].data), con_horas(consultas->itens[i].inicio) ,con_horas(consultas->itens[i].fim) ,consultas->itens[i].status );
+	}
+
+	fclose(file);
+	printf("Consulta removida\n");
+}
+
 void update_status(VetConsultas *consultas){
     if(consultas->qtd == 0){
         printf("Nenhuma consulta cadastrada no sistema\n");

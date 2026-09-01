@@ -290,7 +290,7 @@ void update_medicos(VetMedicos *medicos){
 	fclose(file);
     
 }
-void remover_medico(VetMedicos *medicos) {
+void remover_medico(VetMedicos *medicos, VetConsultas *consultas) {
 	if(medicos->qtd == 0){
 	    printf("Sem medicos cadastradas no sistema\n");
 	    return;
@@ -308,6 +308,8 @@ void remover_medico(VetMedicos *medicos) {
 		if(choise == 'n')return;
 		if(choise == 'y')break;
 	}
+	
+	int id_medico = medicos->itens[id].id; // guarda o id do medico antes de apaga-lo.
 
 	FILE *file;
 	//Remove o medico
@@ -325,6 +327,10 @@ void remover_medico(VetMedicos *medicos) {
 
 	fclose(file);
 	printf("Removendo medico...\n");
+	
+	for(int i = 0; i < consultas->qtd; i++){
+        if(consultas->itens[i].idMedico == id_medico){auto_del_consulta(consultas, i); i--;}
+    }
 }
 //Lista medicos filtrando por especialidade e mostra a quantidade de medicos cadastrados
 void listar_medicos(VetMedicos *medicos) {
