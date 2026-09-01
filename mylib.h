@@ -85,7 +85,7 @@ void add_paciente(VetPacientes *pacientes);
 int search_paciente(VetPacientes *pacientes);
 void read_pacientes(VetPacientes *pacientes);
 int realocar_pacientes(VetPacientes *pacientes);
-void remover_paciente(VetPacientes *pacientes);
+void remover_paciente(VetPacientes *pacientes, VetConsultas *consultas);
 void list_pacientes(VetPacientes *pacientes);
 void update_pacientes(VetPacientes *pacientes);
 //Prototipos de funções de medicos
@@ -95,7 +95,7 @@ int realocar_medicos(VetMedicos *medicos);
 void add_medico(VetMedicos *medicos);
 void mostrar_medico(Medico medico);
 int pesquisar_medicos(VetMedicos *medicos);
-void remover_medico(VetMedicos *medicos);
+void remover_medico(VetMedicos *medicos, VetConsultas *consultas);
 void listar_medicos(VetMedicos *medicos);
 void update_medicos(VetMedicos *medicos);
 
@@ -114,4 +114,5 @@ int search_consultas(VetConsultas *consultas);
 void del_consulta(VetConsultas *consultas);
 void update_status(VetConsultas *consultas);;
 int verify_consulta(VetMedicos *medicos, VetConsultas *consultas, Data data, Horario inicio, int id_medico);
+void auto_del_consulta(VetConsultas *consultas, int id);
 #endif

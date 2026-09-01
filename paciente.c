@@ -164,7 +164,7 @@ int realocar_pacientes(VetPacientes *pacientes) {
 	return 1;
 }
 
-void remover_paciente(VetPacientes *pacientes){
+void remover_paciente(VetPacientes *pacientes, VetConsultas *consultas){
     
     if(pacientes->qtd == 0){
 	    printf("Sem pacientes cadastradas no sistema\n");
@@ -179,6 +179,8 @@ void remover_paciente(VetPacientes *pacientes){
     
     FILE *file;
     
+    int id_paciente = pacientes->itens[id].id; //guarda o id do paciente que será removido antes de sobrescreve-lo no vetor.
+    
     for(int i = id; i<pacientes->qtd-1; i++){
         pacientes->itens[i] = pacientes->itens[i+1];
     }
@@ -191,6 +193,10 @@ void remover_paciente(VetPacientes *pacientes){
     }
     fclose(file);
     printf("Paciente removido.\n");
+    
+    for(int i = 0; i < consultas->qtd; i++){
+        if(consultas->itens[i].idPaciente == id_paciente){auto_del_consulta(consultas, i); i--;}
+    }
     
 }
 
