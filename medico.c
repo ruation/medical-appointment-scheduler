@@ -4,17 +4,22 @@
 #include <stdlib.h>
 #include "mylib.h"
 
-//Para a todo momento verificar o tamanho do vetor, caso precise aumentar. Adiciona mais 10
+/**
+ * @brief Checks if the doctor vector capacity is full and expands it by 10 elements.
+ * @param[in,out] medicos Pointer to the dynamic doctor vector.
+ * @return 1 on successful reallocation or when capacity is sufficient; 0 on memory allocation failure.
+ * @note Uses a temporary pointer to guard against data loss if realloc() fails.
+ */
 int realocar_medicos(VetMedicos *medicos) {
-	//Para comparar se a quantidade do vetor ocupado chegou no limite
+	// Check if current element count has reached allocated capacity
 	if(medicos->qtd == medicos->cap) {
 
 		Medico *medicos1;
-		//declara um novo struct para garantir que o primeiro não vai se perder ao tentar realocar o espaço
+		// Allocate to temporary pointer to prevent memory leaks if realloc fails
 		medicos1 = (Medico*) realloc(medicos->itens, (medicos->cap+10) * sizeof(Medico));
 
 		if(medicos1 != NULL) {
-			//caso der certo, o vetor medicos.itens será realocado para ter o novo tamanho
+			// On successful reallocation, assign new buffer and increment capacity
 			medicos->itens = medicos1;
 			medicos->cap += 10;
 			return 1;
@@ -25,10 +30,13 @@ int realocar_medicos(VetMedicos *medicos) {
 	return 1;
 }
 
-//Para converter o numero da especialidade em uma string
-//Especialidade é do tipo enum, ou seja, um inteiro
+/**
+ * @brief Maps an integer specialty code to its human-readable string representation.
+ * @param[in] n Integer specialty identifier corresponding to the Especialidade enum.
+ * @return Constant string literal representing specialty name, or "Especialidade invalida".
+ */
 const char* ler_especialidade(int n) {
-	//Recebe um numero da especialidade e devolve a string correta
+	// Return the descriptive string corresponding to the specialty code
 	switch(n) {
 	case 0:
 		return "Clinico";
@@ -46,25 +54,29 @@ const char* ler_especialidade(int n) {
 
 }
 
-//Ler a quantidade de medicos no inicio da aplicação, para conseguir transcrever todos em um vetor
-//Converter todos medicos cadastrados no arquivo em um vetor
+/**
+ * @brief Loads doctor records from "medicos.txt" into the in-memory dynamic vector.
+ * @param[out] medicos Pointer to the dynamic doctor vector to initialize and populate.
+ * @note If "medicos.txt" does not exist, allocates baseline capacity of 10 and creates an empty file.
+ *       Otherwise, allocates (line_count + 10) capacity via malloc and deserializes pipe-delimited records.
+ */
 void read_medicos(VetMedicos *medicos) {
 	FILE *file;
 
 	file = fopen("medicos.txt","r");
 
 	if(file == NULL) {
-		//Caso não exista arquivo nenhum, cria um vetor dinamico de tamanho 10
+		// If no file exists, initialize empty dynamic array with baseline capacity of 10
 
 		medicos->qtd = 0, medicos->cap = 10;
 		medicos->itens = (Medico *) malloc(sizeof(Medico) * medicos->cap);
-		//testa se há memaria para fazer a alocação
+		// Verify successful heap allocation
 		if(medicos->itens == NULL) {
 			printf("Erro de memoria\n");
 			return;
 		}
 
-		//cria um novo arquivo
+		// Create a new empty flat file
 		file = fopen("medicos.txt","w");
 		if(file == NULL) {
 			printf("Erro ao abrir o arquivo\n");
@@ -74,57 +86,61 @@ void read_medicos(VetMedicos *medicos) {
 
 	} else {
 
-		//Chama uma função geral que serve para contar quantas linhas tem no arquivo,
-		//cria um vetor com a quantidade de linhas + 10.
-		//Considere cada linha um objeto
-
+		// Count total lines in the file and allocate capacity for lines + 10 records
 		int n1, n2, n3, n4, i = 0;
-		//Variaveis n vão ser usadas para pegar os numeros inteiros que serão usado para pegar os hararios
+		// Variables n1..n4 store packed integer representations of shift times
 		medicos->qtd = contar_linhas(file);
 
 		medicos->cap = medicos->qtd + 10;
 		medicos->itens = (Medico *) malloc(sizeof(Medico) * medicos->cap);
 
-		//testa a alocação
+		// Verify heap allocation success
 		if(medicos->itens == NULL) {
 			printf("Erro ao realocar o vetor\n");
 			fclose(file);
 			return;
 		}
-		//Varrer por todos elementos no arquivo, pegando cada atributo e colocando
-		//Usa | para dividir o elementos
-		//O %63[^|] garante pegar uma string com 63 elementos, ela vai lendo até parar no |
-		//Serve para pegar nomes compostos
+		// Iterate through file lines, reading fields delimited by the pipe ('|') character.
+		// %63[^|] reads up to 63 characters until the delimiter to support compound names.
 		while(fscanf(file, "%d|%63[^|]|%d|%d|%d|%d|%d",&medicos->itens[i].id, medicos->itens[i].nome, &medicos->itens[i].especialidade, &n1,&n2,&n3,&n4) ==7) {
-			//Adendo: strutc Especialidade é tipo enum, tem como representar como inteiro
-			//Como o struct Medico tem 4 variaveis Horario
-			//Chamo as funções desconverter_horas para já prencher cada espaço da variavel. Otimizando o processo
+			// Unpack packed integer times (HHMM) into Horario structures
 			desconverter_horas(n1,&medicos->itens[i].inicioManha);
 			desconverter_horas(n2,&medicos->itens[i].fimManha);
 			desconverter_horas(n3,&medicos->itens[i].inicioTarde);
 			desconverter_horas(n4,&medicos->itens[i].fimTarde);
 			i++;
 		}
-		//Por garantia pega agora o numero de fato que existe em medicos
+		// Set actual count of loaded doctor records
 		medicos->qtd = i;
 		fclose(file);
 		return;
 	}
 }
-//Para quando necessario mostrar os medicos
+
+/**
+ * @brief Formats and displays a single doctor's record and shift schedule to stdout.
+ * @param[in] medico Doctor structure containing the data to display.
+ */
 void mostrar_medico(Medico medico) {
 	printf("Medico: %s      id: %d      Especildiade: %s\n", medico.nome,medico.id, ler_especialidade(medico.especialidade));
 	printf("Horario de manhâ das %d:%d até %d:%d\n",medico.inicioManha.horas, medico.inicioManha.minutos, medico.fimManha.horas, medico.fimManha.minutos);
 	printf("Horario de tarde das %d:%d até %d:%d\n",medico.inicioTarde.horas, medico.inicioTarde.minutos, medico.fimTarde.horas, medico.fimTarde.minutos);
 
 }
+
+/**
+ * @brief Interactively collects doctor details, appends to "medicos.txt", and adds to in-memory vector.
+ * @param[in,out] medicos Pointer to the dynamic doctor vector.
+ * @note Reallocates array capacity if full (+10). Generates an auto-incrementing ID.
+ *       Enforces 3-hour fixed duration for morning and afternoon shifts.
+ */
 void add_medico(VetMedicos *medicos) {
 	int maior = 0, choise1;
 	char choise;
-	//medico é usado como uma variavel de espaço temporario, só quando é confirmado adição que os dados são guardados
+	// Temporary structure to hold inputs until user confirms registration
 	Medico medico;
 
-	//testa se é necessario aumentar o vetor de medicos
+	// Verify and expand vector capacity if required
 	choise1 = realocar_medicos(medicos);
 
 	if(choise1==0) {
@@ -132,7 +148,7 @@ void add_medico(VetMedicos *medicos) {
 		return;
 	}
 
-	//Percorre todo vetor de medicos, no final pega o maior id existente e adiciana +1. Caso não haja nenhum medico, o novo recebe 1
+	// Find the highest existing doctor ID and assign ID = highest + 1
 	if(medicos->qtd > 0) {
 		for(int i=0; i<medicos->qtd; i++) {
 			if(medicos->itens[i].id>=maior) {
@@ -148,7 +164,7 @@ void add_medico(VetMedicos *medicos) {
     	medico.nome[strcspn(medico.nome, "\n")] = '\0';
     }while(verify_name(medico.nome)!= 1);
 	
-	//Recebe a especialidade do medico e converte para ficar da maneira correta
+	// Collect and validate medical specialty option
 	while(1) {
 		printf("Escolha uma das seguintes especialidade do médico\nClinico: 1\nPediatra: 2\nDermatologista: 3\nCardiologista: 4\nOutra: 5\n");
 		scanf("%d",&choise1);
@@ -181,7 +197,7 @@ void add_medico(VetMedicos *medicos) {
 		if(choise == 'n')return;
 		if(choise == 'y')break;
 	}
-	//Cria agora o arquivo, caso fosse no inicio e o usuario não criasse o medico, o arquivo não seria fechado. Assim podendo corromper o arquivo
+	// Open file only after confirmation to prevent dangling or corrupted files on cancellation
 	FILE *file;
 
 	file = fopen("medicos.txt", "a");
@@ -194,12 +210,18 @@ void add_medico(VetMedicos *medicos) {
 
 	fclose(file);
 
-	//Como medicos->itens é do tipo Medico, ele consegue receber diretamente a variavel medico
+	// Insert confirmed record into in-memory array
 	medicos->itens[medicos->qtd] = medico;
 
 	medicos->qtd++;
 }
 
+/**
+ * @brief Interactively searches for a doctor by unique ID via linear scan.
+ * @param[in] medicos Pointer to the dynamic doctor vector.
+ * @return Vector index of the doctor if found; -1 if not found; -2 if vector is empty.
+ * @note Displays doctor details using mostrar_medico() upon finding a match.
+ */
 int pesquisar_medicos(VetMedicos *medicos) {
 	int numero, i;
 	Medico medico1;
@@ -208,10 +230,10 @@ int pesquisar_medicos(VetMedicos *medicos) {
 	
 	printf("Digite o id do medico desejado\n");
 	scanf("%d", &numero);
-	//Percorre todo vetor de medicos até encontrar o medico com id escolhido pelo usuario.
+	// Scan the vector until finding the doctor with the matching ID
 
 	for(i = 0; i < medicos->qtd && numero!=medicos->itens[i].id; i++);
-	//Testa se encontrou o medico
+	// Verify if a valid match was found
 	if( i < medicos->itens[i].id && numero!=0) {
 		if(numero == medicos->itens[i].id) {
 			printf("Medico encontrado\n");
@@ -224,6 +246,11 @@ int pesquisar_medicos(VetMedicos *medicos) {
 	}
 }
 
+/**
+ * @brief Interactively updates an existing doctor's attributes and persists changes to "medicos.txt".
+ * @param[in,out] medicos Pointer to the dynamic doctor vector.
+ * @note Re-prompts all doctor attributes, updates in-memory vector, and overwrites "medicos.txt".
+ */
 void update_medicos(VetMedicos *medicos){
     
     if(medicos->qtd == 0){
@@ -290,6 +317,14 @@ void update_medicos(VetMedicos *medicos){
 	fclose(file);
     
 }
+
+/**
+ * @brief Removes a doctor by ID, rewrites "medicos.txt", and cascades deletion to linked appointments.
+ * @param[in,out] medicos Pointer to the dynamic doctor vector.
+ * @param[in,out] consultas Pointer to the dynamic appointment vector for cascade deletion.
+ * @note Shifts elements leftward to overwrite deleted slot, rewrites "medicos.txt",
+ *       and calls auto_del_consulta() on all appointments associated with this doctor.
+ */
 void remover_medico(VetMedicos *medicos, VetConsultas *consultas) {
 	if(medicos->qtd == 0){
 	    printf("Sem medicos cadastradas no sistema\n");
@@ -298,7 +333,7 @@ void remover_medico(VetMedicos *medicos, VetConsultas *consultas) {
 	int i, id;
 	char choise;
 	id = pesquisar_medicos(medicos);
-	//Aproveita a função anterior para já pegar o id do medico selecionado para ser deletado
+	// Obtain the doctor index to delete
 	if(id==-1)return;
 	printf("Deseja remover esse medico?\n");
 
@@ -309,18 +344,17 @@ void remover_medico(VetMedicos *medicos, VetConsultas *consultas) {
 		if(choise == 'y')break;
 	}
 	
-	int id_medico = medicos->itens[id].id; // guarda o id do medico antes de apaga-lo.
+	int id_medico = medicos->itens[id].id; // Retain doctor ID before element overwrite
 
 	FILE *file;
-	//Remove o medico
-	//Basicamente joga todos elemetos a direita dele para esquerda. Sobreescrevendo o elemento apagado
+	// Remove doctor by shifting all elements to the right of target one position to the left
 	for(i = id; i < medicos->qtd-1 ; i++) {
 		medicos->itens[i] = medicos->itens[i + 1];
 	}
 	medicos->qtd--;
 
 	file = fopen("medicos.txt", "w");
-	//Limpa todo o arquivo e em seguida preenche novamente com os dados restantes do vetor
+	// Overwrite file with updated vector records
 	for(i = 0; i<medicos->qtd; i++) {
 		fprintf(file, "%d|%s|%d|%d|%d|%d|%d\n",medicos->itens[i].id, medicos->itens[i].nome, medicos->itens[i].especialidade,con_horas(medicos->itens[i].inicioManha),con_horas(medicos->itens[i].fimManha),con_horas(medicos->itens[i].inicioTarde),con_horas(medicos->itens[i].fimTarde));
 	}
@@ -332,7 +366,12 @@ void remover_medico(VetMedicos *medicos, VetConsultas *consultas) {
         if(consultas->itens[i].idMedico == id_medico){auto_del_consulta(consultas, i); i--;}
     }
 }
-//Lista medicos filtrando por especialidade e mostra a quantidade de medicos cadastrados
+
+/**
+ * @brief Displays doctors, providing an interactive choice to list all or filter by specialty.
+ * @param[in] medicos Pointer to the dynamic doctor vector.
+ * @note Displays total registered doctor count, and allows filtered viewing by specialty.
+ */
 void listar_medicos(VetMedicos *medicos) {
 	
 	if(medicos->qtd == 0){
@@ -361,7 +400,7 @@ void listar_medicos(VetMedicos *medicos) {
 		}
 	}else{
 	    while(1) {
-    		//Pede a especialidade do medico e depois converte para a função ler_especialidade retornar um valor valido
+    		// Prompt for specialty filter and validate selection
     		while(1) {
     			printf("Escolha uma das seguintes especialidade do médico para filtrar e listar\nClinico: 1\nPediatra: 2\nDermatologista: 3\nCardiologista: 4\nOutra: 5\n");
     			scanf("%d",&choise);
@@ -382,7 +421,7 @@ void listar_medicos(VetMedicos *medicos) {
     				flag++;
     			}
     		}
-    		//Caso não exista um medico com essa especialidade, retorna uma mensagem
+    		// Inform user if no doctors exist with the selected specialty
     		if(flag==0) {
     			printf("Nenhum medico dessa especialidade cadastrado\n");
     			while(1) {
