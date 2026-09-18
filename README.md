@@ -1,10 +1,10 @@
-# Medical Appointment Scheduling System 🩺
+# Medical Appointment Scheduling System 
 
 A modular, high-performance command-line application written in C for managing healthcare clinic operations, patient admissions, physician registries, and medical appointment scheduling with schedule conflict detection, dynamic memory management, and file persistence.
 
 ---
 
-## 🏛️ Academic Context & Background
+## Academic Context & Background
 
 This project was engineered as a comprehensive final practical assignment for the **Introduction to Programming** (*Introdução à Programação*) course at the **Universidade Federal do Agreste de Pernambuco (UFAPE)**, under the academic guidance of **Prof. René Gusmão**.
 
@@ -16,7 +16,7 @@ This project was engineered as a comprehensive final practical assignment for th
 
 ---
 
-## 📐 Project Overview & Architecture
+## Project Overview & Architecture
 
 The system models a healthcare clinic environment centered around three primary domain entities:
 
@@ -50,7 +50,7 @@ The system models a healthcare clinic environment centered around three primary 
 
 ---
 
-## ⚡ Core Technical Highlights
+## Core Technical Highlights
 
 ### 1. Chunk-Based Dynamic Memory Allocation
 * In-memory arrays are maintained using vector wrapper structs (`VetPacientes`, `VetMedicos`, `VetConsultas`) that track current occupancy (`qtd`) and capacity (`cap`).
@@ -91,7 +91,7 @@ The system models a healthcare clinic environment centered around three primary 
 
 ---
 
-## 🛠️ Compilation & Run Instructions
+## Compilation & Run Instructions
 
 ### Prerequisites
 * A standard C compiler supporting C99 or later (e.g., `gcc` or `clang`).
@@ -125,7 +125,7 @@ clinic_system.exe
 
 ---
 
-## 🗄️ File & Data Schema Reference
+## File & Data Schema Reference
 
 All data records are stored in the project's root directory in pipe-delimited (`|`) UTF-8 flat text files.
 
@@ -182,7 +182,7 @@ All data records are stored in the project's root directory in pipe-delimited (`
 
 ---
 
-## 📂 Codebase File Structure
+## Codebase File Structure
 
 | File | Type | Description |
 | :--- | :--- | :--- |
@@ -196,7 +196,7 @@ All data records are stored in the project's root directory in pipe-delimited (`
 
 ---
 
-## 🚀 Project Status
+## Project Status
 
 * **Current State**: Academic practical project completed.
 * **Tested Environment**: Linux (GCC 9+, Clang 10+), C99 compliant.
