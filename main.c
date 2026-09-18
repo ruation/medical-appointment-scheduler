@@ -2,19 +2,35 @@
 #include <stdlib.h>
 #include "mylib.h"
 
+/**
+ * @file main.c
+ * @brief Application entry point and interactive CLI menu driver for the Medical Appointment Scheduling System.
+ *
+ * Coordinates initialization of patient, doctor, and appointment data structures, presents
+ * interactive command-line menus for CRUD operations, and guarantees proper resource release
+ * upon exit.
+ */
+
+/**
+ * @brief Main execution entry point and interactive menu controller.
+ * @return 0 upon successful execution and clean exit.
+ * @note Loads persisted data from flat files ("pacientes.txt", "medicos.txt", "consultas.txt")
+ *       into dynamic arrays at startup, guides user interactions through nested switch-case menus,
+ *       and releases all allocated heap memory buffers before exiting.
+ */
 int main()
 {
 	int op, op1;
 
-	// Inicializa o VetPacientes com valores iniciais
+	// Initialize dynamic vector and load persisted patient records
 	VetPacientes pacientes;
 	read_pacientes(&pacientes);
 	
-	//Inicia o VetMedicos
+	// Initialize dynamic vector and load persisted doctor records
 	VetMedicos medicos;
 	read_medicos(&medicos);
 	
-	//Inicializa o VetConsultas com valores iniciais
+	// Initialize dynamic vector and load persisted appointment records
 	VetConsultas consultas;
 	read_consultas(&consultas);
 
@@ -101,6 +117,7 @@ int main()
 		}
 	} while(op!=9);
 	
+	// Release dynamically allocated memory buffers
 	free(pacientes.itens);
 	free(medicos.itens);
 	free(consultas.itens);

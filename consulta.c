@@ -4,8 +4,16 @@
 #include <stdlib.h>
 #include "mylib.h"
 
+/**
+ * @brief Interactively schedules a new appointment after verifying doctor and patient existence and slot availability.
+ * @param[in,out] consultas Pointer to the dynamic appointment vector.
+ * @param[in,out] pacientes Pointer to the dynamic patient vector (searched for patient selection).
+ * @param[in,out] medicos Pointer to the dynamic doctor vector (searched for doctor selection).
+ * @note Reallocates appointment vector capacity if full (+10). Ensures the selected time slot
+ *       does not conflict with doctor shifts or existing bookings. Appends to "consultas.txt".
+ */
 void add_consulta(VetConsultas *consultas, VetPacientes *pacientes, VetMedicos *medicos){
-    int choise1, status = 0; //teste
+    int choise1, status = 0; // Initialize appointment with scheduled status (CONS_AGENDADA)
     int id_paciente, id_medico;
     char choice;
     
@@ -41,7 +49,7 @@ void add_consulta(VetConsultas *consultas, VetPacientes *pacientes, VetMedicos *
         for(int i = 0; i < consultas->qtd; i++){
             if(consultas->itens[i].id > maior) maior = consultas->itens[i].id;
         }
-    }
+    } // Find the highest ID among existing appointments
     
     FILE *file;
     
@@ -51,7 +59,7 @@ void add_consulta(VetConsultas *consultas, VetPacientes *pacientes, VetMedicos *
     
     fclose(file);
     
-    //feeding the vector:
+    // Store confirmed appointment record into the in-memory vector
     
     consultas->itens[consultas->qtd].id = maior+1;
     consultas->itens[consultas->qtd].idPaciente = pacientes->itens[id_paciente].id;
@@ -70,17 +78,28 @@ void add_consulta(VetConsultas *consultas, VetPacientes *pacientes, VetMedicos *
     
 }
 
+/**
+ * @brief Validates proposed appointment time against doctor shift bounds and existing appointment conflicts.
+ * @param[in] medicos Pointer to the dynamic doctor vector.
+ * @param[in] consultas Pointer to the dynamic appointment vector.
+ * @param[in] data Proposed date of the appointment.
+ * @param[in] inicio Proposed start time of the appointment.
+ * @param[in] id_medico Array index of the doctor in the medicos vector.
+ * @return 1 if slot is valid and free of conflict; 0 if outside shift or in conflict.
+ * @note Checks morning or afternoon shift boundaries, and verifies that no scheduled appointment
+ *       (status == 0) exists for the same doctor on the same date within 100 time units (1 hour).
+ */
 int verify_consulta(VetMedicos *medicos, VetConsultas *consultas, Data data, Horario inicio, int id_medico){
-    int data_con = con_data(data);//convertendo pra ficar mais facil
+    int data_con = con_data(data);// Pack date into integer for straightforward comparison
     
     int flag = 1;
     
-    if(inicio.horas>12){// Separa a condicional para o caso da consulta ser de tarde ou ser de manhã.
+    if(inicio.horas>12){// Branch validation depending on morning or afternoon shift
         
-        if( con_horas(medicos->itens[id_medico].inicioTarde) > con_horas(inicio)){ //Verifica se o inicio da consulta é antes do inicioTarde do médico.
+        if( con_horas(medicos->itens[id_medico].inicioTarde) > con_horas(inicio)){ // Ensure consultation start is not prior to doctor afternoon shift start
             printf("A consulta não pode ser antes do expediente do médico.\n"); return 0;
         }else{
-            if( con_horas(medicos->itens[id_medico].fimTarde) < (con_horas(inicio) + 100)){ //Verifica se o fim da consulta é depois do fimTarde do médico.
+            if( con_horas(medicos->itens[id_medico].fimTarde) < (con_horas(inicio) + 100)){ // Ensure consultation end does not exceed afternoon shift end
             printf("A consulta não pode terminar depois do expediente do médico.\n"); return 0;}
         }
     }else{
@@ -94,8 +113,8 @@ int verify_consulta(VetMedicos *medicos, VetConsultas *consultas, Data data, Hor
         
     }
     
-    for(int i = 0; i < consultas->qtd; i++){//looping para ver todas as consultas cadastradas.
-        if(con_data(consultas->itens[i].data) == data_con && consultas->itens[i].idMedico == medicos->itens[id_medico].id){ //Verifica se existe uma consulta cadastrada com a mesma data e o mesmo médico.
+    for(int i = 0; i < consultas->qtd; i++){// Loop through all registered appointments to check for overlap
+        if(con_data(consultas->itens[i].data) == data_con && consultas->itens[i].idMedico == medicos->itens[id_medico].id){ // Match by date and doctor ID
             if(abs(con_horas(consultas->itens[i].inicio) - con_horas(inicio)) < 100 && consultas->itens[i].status == 0)flag = 0;
         }
     }
@@ -104,8 +123,13 @@ int verify_consulta(VetMedicos *medicos, VetConsultas *consultas, Data data, Hor
     return 1;
 }
 
+/**
+ * @brief Maps an integer status code to its symbolic enum representation name.
+ * @param[in] n Status integer code (0-3).
+ * @return Constant string literal corresponding to the status, or "Status invalido".
+ */
 const char* ler_status(int n) {
-	//Recebe um numero do status e devolve a string correta
+	// Return the descriptive string corresponding to the appointment status code
 	switch(n) {
 	case 0:
 		return "CONS_AGENDADA";
@@ -120,10 +144,20 @@ const char* ler_status(int n) {
 	}
 
 }
+
+/**
+ * @brief Displays formatted details of a single appointment record to stdout.
+ * @param[in] consultas Pointer to the appointment record to print.
+ */
 void printar_consultas(Consulta *consultas){
     printf("id: %d id_medico: %d id_paciente: %d data: %d/%d/%d horario: %dh%d as %dh%d status: %s\n", consultas->id, consultas->idMedico, consultas->idPaciente, consultas->data.dia, consultas->data.mes, consultas->data.ano, consultas->inicio.horas, consultas->inicio.minutos, consultas->fim.horas, consultas->fim.minutos, ler_status(consultas->status));
 }
 
+/**
+ * @brief Displays appointments, providing an option to view all or filter by lifecycle status.
+ * @param[in] consultas Pointer to the dynamic appointment vector.
+ * @note Status filter options: 1 = All, 2 = Scheduled, 3 = Completed, 4 = Canceled, 5 = Missed.
+ */
 void list_consultas(VetConsultas *consultas){
     
     if(consultas->qtd == 0){
@@ -140,14 +174,26 @@ void list_consultas(VetConsultas *consultas){
     }else{
         for(int i = 0; i<consultas->qtd; i++){
             if(consultas->itens[i].status == (choice-2))printf("id: %d id_medico: %d id_paciente: %d data: %d/%d/%d horario: %dh%d as %dh%d status: %s\n", consultas->itens[i].id, consultas->itens[i].idMedico, consultas->itens[i].idPaciente, consultas->itens[i].data.dia, consultas->itens[i].data.mes, consultas->itens[i].data.ano, consultas->itens[i].inicio.horas, consultas->itens[i].inicio.minutos, consultas->itens[i].fim.horas, consultas->itens[i].fim.minutos, ler_status(consultas->itens[i].status));
-    }}
+        }
+    }
 }
 
+/**
+ * @brief Packs a Data structure into a single integer formatted as YYYYMMDD.
+ * @param[in] data Data struct containing day, month, and year.
+ * @return Packed integer calculated as (ano * 10000) + (mes * 100) + dia.
+ */
 int con_data(Data data){
     data.ano *= 10000;
     data.mes *= 100;
     return data.dia + data.mes + data.ano;
 }
+
+/**
+ * @brief Interactively prompts the user to input and validate date components.
+ * @param[out] data Pointer to Data structure where validated day, month, and year are written.
+ * @note Enforces day in [1, 30], month in [1, 12], and year >= 2026.
+ */
 void add_data(Data *data){
     while(1){
         printf("Digite um dia para consulta:\n");
@@ -171,12 +217,24 @@ void add_data(Data *data){
         }else{printf("Erro, digite um ano valido\n");}
     }
 }
+
+/**
+ * @brief Unpacks an integer in YYYYMMDD format into day, month, and year in a Data struct.
+ * @param[out] data Pointer to Data structure where unpacked components will be stored.
+ * @param[in] n Packed date integer in YYYYMMDD format.
+ */
 void descon_data(Data *data, int n){
     data->ano = n / 10000; 
     data->mes = n % 10000 / 100;
     data->dia = n % 10000 % 100;
 }
 
+/**
+ * @brief Loads appointment records from "consultas.txt" into the in-memory dynamic vector.
+ * @param[out] consultas Pointer to the dynamic appointment vector to initialize and populate.
+ * @note If "consultas.txt" does not exist, allocates baseline capacity of 10 and creates an empty file.
+ *       Otherwise, allocates (line_count + 10) elements via malloc and deserializes pipe-delimited records.
+ */
 void read_consultas(VetConsultas *consultas){
 	FILE *file;
 
@@ -191,7 +249,7 @@ void read_consultas(VetConsultas *consultas){
 			return;
 		}
 
-		//cria um novo arquivo
+		// Create a new empty flat file
 		file = fopen("consultas.txt","w");
 		if(file == NULL) {
 			printf("Erro ao abrir o arquivo\n");
@@ -227,6 +285,12 @@ void read_consultas(VetConsultas *consultas){
 	}
 }
 
+/**
+ * @brief Checks if the appointment vector capacity is full and expands it by 10 elements.
+ * @param[in,out] consultas Pointer to the dynamic appointment vector.
+ * @return 1 on successful reallocation or when capacity is sufficient; 0 on memory allocation failure.
+ * @note Employs a temporary pointer with realloc() to prevent memory leaks on allocation failure.
+ */
 int realocar_consultas(VetConsultas *consultas) {
 	if(consultas->qtd == consultas->cap) {
 		Consulta *consultas1;
@@ -242,6 +306,12 @@ int realocar_consultas(VetConsultas *consultas) {
 	return 1;
 }
 
+/**
+ * @brief Interactively searches for an appointment by unique ID via linear scan of the vector.
+ * @param[in] consultas Pointer to the dynamic appointment vector.
+ * @return Vector index of the appointment if found; -1 if not found or vector is empty.
+ * @note Displays appointment details using printar_consultas() upon finding a match.
+ */
 int search_consultas(VetConsultas *consultas){
     int numero, i;
 	
@@ -261,13 +331,19 @@ int search_consultas(VetConsultas *consultas){
 		if(numero == consultas->itens[i].id) {
 			printf("Consulta encontrado\n");
 			printar_consultas(&consultas->itens[i]);
-			return i;
+			return i; // Return the array index of the matched appointment
 		}
 	} else {
 		printf("Consulta não encontrado no sistema\n");
 		return -1;
 	}
 }
+
+/**
+ * @brief Interactively removes an appointment by ID, updates vector, and rewrites "consultas.txt".
+ * @param[in,out] consultas Pointer to the dynamic appointment vector.
+ * @note Prompts for ID, prompts confirmation, shifts elements leftward, and rewrites the flat file.
+ */
 void del_consulta(VetConsultas *consultas){
     
     if(consultas->qtd == 0){
@@ -277,7 +353,7 @@ void del_consulta(VetConsultas *consultas){
     int i, id;
 	char choise;
 	
-	id = search_consultas(consultas);
+	id = search_consultas(consultas); // Find array index of target appointment
 
 	if(id==-1)return;
 	printf("Deseja remover essa consulta?\n");
@@ -295,7 +371,7 @@ void del_consulta(VetConsultas *consultas){
 	}
 	consultas->qtd--;
 
-	file = fopen("consultas.txt", "w");
+	file = fopen("consultas.txt", "w"); // Rewrite the file with all remaining records
 
 	for(i = 0; i< consultas->qtd; i++) {
         fprintf(file, "%d | %d | %d | %d | %d | %d | %d\n",consultas->itens[i].id ,consultas->itens[i].idMedico ,consultas->itens[i].idPaciente, con_data(consultas->itens[i].data), con_horas(consultas->itens[i].inicio) ,con_horas(consultas->itens[i].fim) ,consultas->itens[i].status );
@@ -305,9 +381,15 @@ void del_consulta(VetConsultas *consultas){
 	printf("Consulta removida\n");
 }
 
+/**
+ * @brief Programmatically removes an appointment by array index without user prompt.
+ * @param[in,out] consultas Pointer to the dynamic appointment vector.
+ * @param[in] id Array index of the appointment to delete.
+ * @note Shifts remaining elements leftward and rewrites "consultas.txt". Used in cascade deletions.
+ */
 void auto_del_consulta(VetConsultas *consultas, int id){
 
-
+    // Function accepts target consultation index directly as argument for automated cascade deletion
 	FILE *file;
 	
 	for(int i = id; i < consultas->qtd-1 ; i++) {
@@ -325,6 +407,12 @@ void auto_del_consulta(VetConsultas *consultas, int id){
 	printf("Consulta removida\n");
 }
 
+/**
+ * @brief Interactively updates an appointment's lifecycle status and rewrites "consultas.txt".
+ * @param[in,out] consultas Pointer to the dynamic appointment vector.
+ * @note Prompts for appointment ID via search_consultas(), allows selecting new status
+ *       (1: Scheduled, 2: Completed, 3: Canceled, 4: Missed), updates vector, and rewrites file.
+ */
 void update_status(VetConsultas *consultas){
     if(consultas->qtd == 0){
         printf("Nenhuma consulta cadastrada no sistema\n");
